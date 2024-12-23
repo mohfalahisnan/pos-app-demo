@@ -1,0 +1,234 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String  @id @default(cuid())
+  username  String  @unique
+  email     String  @unique
+  password  String?
+  firstName String?
+  lastName  String?
+  imageUrl  String?
+
+  warehouseId String?
+  warehouse   Warehouse? @relation(fields: [warehouseId], references: [id])
+
+  role Role @default(USER)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Warehouse {
+  id        String   @id @default(cuid())
+  name      String // Nama gudang
+  code      String   @unique // Kode unik gudang
+  location  String? // Lokasi gudang (e.g., alamat)
+  capacity  Int? // Kapasitas maksimum gudang (opsional)
+  isActive  Boolean  @default(true) // Status aktif gudang
+  createdAt DateTime @default(now()) // Tanggal pembuatan
+  updatedAt DateTime @updatedAt // Tanggal terakhir diperbarui
+  Stock     Stock[]
+  User      User[]
+
+  @@map("warehouses")
+}
+
+model Store {
+  id        String   @id @default(cuid())
+  name      String // Nama toko
+  code      String   @unique // Kode unik toko
+  location  String? // Lokasi toko (e.g., alamat)
+  isActive  Boolean  @default(true) // Status aktif toko
+  createdAt DateTime @default(now()) // Tanggal pembuatan
+  updatedAt DateTime @updatedAt // Tanggal terakhir diperbarui
+  Stock     Stock[]
+
+  @@map("stores")
+}
+
+model Member {
+  id      String @id @default(cuid())
+  name    String
+  email   String
+  phone   String
+  address String
+
+  createdAt DateTime  @default(now()) // Tanggal pembuatan
+  updatedAt DateTime  @updatedAt // Tanggal terakhir diperbarui
+  Order     Order[]
+  Invoice   Invoice[]
+
+  @@map("members")
+}
+
+model Product {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  price       Float
+  sku         String   @unique
+  tags        String[] @default([])
+
+  isActive   Boolean     @default(true)
+  discount   Float? // Diskon dalam persentase
+  imageUrl   String? // URL gambar produk
+  categoryId String
+  category   Category    @relation(fields: [categoryId], references: [id])
+  orderItems OrderItem[]
+
+  promoId   String?
+  promo     Promo?   @relation(fields: [promoId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  Stock     Stock[]
+
+  @@map("products")
+}
+
+model Stock {
+  id    String @id @default(cuid())
+  total Int
+
+  warehouseId String?
+  warehouse   Warehouse? @relation(fields: [warehouseId], references: [id])
+
+  storeId String?
+  store   Store?  @relation(fields: [storeId], references: [id])
+
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+}
+
+model Category {
+  id          String    @id @default(cuid())
+  name        String    @unique
+  description String?
+  isActive    Boolean   @default(true)
+  products    Product[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@map("categories")
+}
+
+model Customer {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  phone     String?
+  address   String?
+  isActive  Boolean  @default(true)
+  orders    Order[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("customers")
+}
+
+model MemberType {
+  id    String  @id @default(cuid())
+  name  String
+  Promo Promo[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("member_type")
+}
+
+model Promo {
+  id           String      @id @default(cuid())
+  name         String
+  description  String?
+  memberTypeId String?
+  memberType   MemberType? @relation(fields: [memberTypeId], references: [id])
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  Product   Product[]
+
+  @@map("prommo")
+}
+
+model Order {
+  id          String      @id @default(cuid())
+  orderNumber String      @unique // Nomor unik untuk pesanan
+  customerId  String
+  customer    Customer    @relation(fields: [customerId], references: [id])
+  orderItems  OrderItem[]
+  totalAmount Float // Total harga pesanan
+  status      OrderStatus @default(PENDING) // Status pesanan
+  memberId    String?
+  member      Member?     @relation(fields: [memberId], references: [id])
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  Invoice     Invoice[]
+
+  @@map("orders")
+}
+
+model OrderItem {
+  id         String   @id @default(cuid())
+  orderId    String
+  productId  String
+  quantity   Int // Jumlah produk dalam pesanan
+  unitPrice  Float // Harga satuan saat pesanan dibuat
+  discount   Float? // Diskon untuk item
+  totalPrice Float // Harga total untuk item setelah diskon
+  order      Order    @relation(fields: [orderId], references: [id])
+  product    Product  @relation(fields: [productId], references: [id])
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@map("order_items")
+}
+
+model Invoice {
+  id            String        @id @default(cuid())
+  invoiceNumber String        @unique // Nomor faktur
+  orderId       String
+  order         Order         @relation(fields: [orderId], references: [id])
+  issuedAt      DateTime      @default(now()) // Tanggal faktur diterbitkan
+  dueDate       DateTime // Tanggal jatuh tempo
+  status        InvoiceStatus @default(UNPAID) // Status pembayaran faktur
+  totalAmount   Float // Total pembayaran
+  memberId      String?
+  member        Member?       @relation(fields: [memberId], references: [id])
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  @@map("invoices")
+}
+
+enum OrderStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  CANCELED
+}
+
+enum InvoiceStatus {
+  UNPAID
+  PAID
+  OVERDUE
+}
+
+enum Role {
+  SUPERADMIN
+  ADMIN
+  MODERATOR
+  USER
+}

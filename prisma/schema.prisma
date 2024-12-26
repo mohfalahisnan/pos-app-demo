@@ -32,29 +32,30 @@ model User {
 }
 
 model Warehouse {
-  id        String   @id @default(cuid())
+  id        String    @id @default(cuid())
   name      String // Nama gudang
-  code      String   @unique // Kode unik gudang
+  code      String    @unique // Kode unik gudang
   location  String? // Lokasi gudang (e.g., alamat)
   capacity  Int? // Kapasitas maksimum gudang (opsional)
-  isActive  Boolean  @default(true) // Status aktif gudang
-  createdAt DateTime @default(now()) // Tanggal pembuatan
-  updatedAt DateTime @updatedAt // Tanggal terakhir diperbarui
-  Stock     Stock[]
+  isActive  Boolean   @default(true) // Status aktif gudang
+  createdAt DateTime  @default(now()) // Tanggal pembuatan
+  updatedAt DateTime  @updatedAt // Tanggal terakhir diperbarui
   User      User[]
+  Product   Product[]
+  Stock     Stock[]
 
   @@map("warehouses")
 }
 
 model Store {
-  id        String   @id @default(cuid())
+  id        String    @id @default(cuid())
   name      String // Nama toko
-  code      String   @unique // Kode unik toko
+  code      String    @unique // Kode unik toko
   location  String? // Lokasi toko (e.g., alamat)
-  isActive  Boolean  @default(true) // Status aktif toko
-  createdAt DateTime @default(now()) // Tanggal pembuatan
-  updatedAt DateTime @updatedAt // Tanggal terakhir diperbarui
-  Stock     Stock[]
+  isActive  Boolean   @default(true) // Status aktif toko
+  createdAt DateTime  @default(now()) // Tanggal pembuatan
+  updatedAt DateTime  @updatedAt // Tanggal terakhir diperbarui
+  Product   Product[]
 
   @@map("stores")
 }
@@ -79,37 +80,93 @@ model Product {
   name        String
   description String?
   price       Float
-  sku         String   @unique
+  sku         String?  @unique
   tags        String[] @default([])
 
-  isActive   Boolean     @default(true)
-  discount   Float? // Diskon dalam persentase
-  imageUrl   String? // URL gambar produk
-  categoryId String
-  category   Category    @relation(fields: [categoryId], references: [id])
+  isActive Boolean @default(true)
+  discount Float? // Diskon dalam persentase
+  imageUrl String? // URL gambar produk
+
+  categoryId String?
+  category   Category? @relation(fields: [categoryId], references: [id])
+
   orderItems OrderItem[]
 
   promoId   String?
   promo     Promo?   @relation(fields: [promoId], references: [id])
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  Stock     Stock[]
 
-  @@map("products")
-}
-
-model Stock {
-  id    String @id @default(cuid())
-  total Int
-
-  warehouseId String?
-  warehouse   Warehouse? @relation(fields: [warehouseId], references: [id])
+  warehouseId String
+  warehouse   Warehouse @relation(fields: [warehouseId], references: [id])
 
   storeId String?
   store   Store?  @relation(fields: [storeId], references: [id])
 
-  productId String
-  product   Product @relation(fields: [productId], references: [id])
+  Variant Variant[]
+
+  @@map("products")
+}
+
+model Attribute {
+  id     Int              @id @default(autoincrement())
+  name   String
+  values AttributeValue[] // Relasi ke tabel AttributeValue
+
+  @@map("attribute")
+}
+
+model AttributeValue {
+  id                Int                @id @default(autoincrement())
+  value             String
+  attribute         Attribute          @relation(fields: [attributeId], references: [id])
+  attributeId       Int
+  variantAttributes VariantAttribute[] // Relasi ke tabel VariantAttribute
+
+  @@map("attribute_value")
+}
+
+model Variant {
+  id             Int                @id @default(autoincrement())
+  product        Product            @relation(fields: [productId], references: [id])
+  productId      String
+  price          Float
+  attributes     VariantAttribute[] // Relasi ke tabel VariantAttribute
+  Stock          Stock[]
+  WholesalePrice WholesalePrice[]
+
+  @@map("variant")
+}
+
+model VariantAttribute {
+  variant          Variant        @relation(fields: [variantId], references: [id])
+  variantId        Int
+  attributeValue   AttributeValue @relation(fields: [attributeValueId], references: [id])
+  attributeValueId Int
+
+  @@id([variantId, attributeValueId]) // Kombinasi unik untuk mencegah duplikasi
+  @@map("variant_attribute")
+}
+
+model Stock {
+  id          Int       @id @default(autoincrement())
+  variant     Variant   @relation(fields: [variantId], references: [id])
+  variantId   Int
+  warehouse   Warehouse @relation(fields: [warehouseId], references: [id])
+  warehouseId String
+  quantity    Int // Jumlah stok di lokasi ini
+
+  @@unique([variantId, warehouseId]) // Kombinasi unik varian dan lokasi
+}
+
+model WholesalePrice {
+  id          Int     @id @default(autoincrement())
+  variant     Variant @relation(fields: [variantId], references: [id])
+  variantId   Int
+  minQuantity Int // Jumlah minimum pembelian
+  price       Float // Harga per unit untuk pembelian grosir
+
+  @@unique([variantId, minQuantity]) // Kombinasi unik varian dan jumlah minimum
 }
 
 model Category {
@@ -216,8 +273,10 @@ model Invoice {
 enum OrderStatus {
   PENDING
   PROCESSING
+  DELIVERY
   COMPLETED
   CANCELED
+  FAILED
 }
 
 enum InvoiceStatus {

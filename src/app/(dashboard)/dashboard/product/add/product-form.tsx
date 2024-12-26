@@ -30,9 +30,12 @@ import { SingleImageDropzone } from "@/components/upload/single-image";
 import { useToast } from "@/hooks/use-toast";
 import { useEdgeStore } from "@/lib/edgestore";
 import { cn } from "@/lib/utils";
+import { addProduct } from "@/server/product";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Category } from "@prisma/client";
+import { useMutation } from "@tanstack/react-query";
 import { Check, ChevronsUpDown } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 
@@ -64,11 +67,38 @@ export default function ProductForm({
   const { edgestore } = useEdgeStore();
 
   const { toast } = useToast();
+  const router = useRouter();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       tags: ["tags"],
       available: true,
+    },
+  });
+  const addMutation = useMutation({
+    mutationFn: async (
+      values: z.infer<typeof formSchema> & { imgUrl: string }
+    ) =>
+      await addProduct({
+        name: values.name,
+        price: values.price,
+        description: values.description,
+        sku: "",
+        warehouse: {
+          connect: {
+            id: "cm5556igv0003hh84e1rxpdoh",
+          },
+        },
+        category: {
+          connect: {
+            name: values.category,
+          },
+        },
+        imageUrl: values.imgUrl,
+      }),
+
+    onSuccess: (data) => {
+      router.push(`/dashboard/product/add/${data.id}`);
     },
   });
 
@@ -106,11 +136,7 @@ export default function ProductForm({
           ...values,
           imageUrl: res.url,
         });
-        // await addProduct({
-        //   ...values,
-        //   sku: "",
-        //   imageUrl: res.url,
-        // });
+        addMutation.mutate({ imgUrl: res.url, ...values });
       } catch (error) {
         console.error("Form submission error", error);
         toast({

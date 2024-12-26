@@ -16,9 +16,10 @@ export async function getProducts() {
 
 export async function addProduct(data: Prisma.ProductCreateInput) {
   try {
-    await prisma.product.create({
+    const product = await prisma.product.create({
       data,
     });
+    return product;
   } catch (error) {
     console.log(error);
     throw new Error();

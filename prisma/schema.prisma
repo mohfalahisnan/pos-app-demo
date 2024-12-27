@@ -48,14 +48,16 @@ model Warehouse {
 }
 
 model Store {
-  id        String    @id @default(cuid())
+  id        String   @id @default(cuid())
   name      String // Nama toko
-  code      String    @unique // Kode unik toko
+  code      String   @unique // Kode unik toko
   location  String? // Lokasi toko (e.g., alamat)
-  isActive  Boolean   @default(true) // Status aktif toko
-  createdAt DateTime  @default(now()) // Tanggal pembuatan
-  updatedAt DateTime  @updatedAt // Tanggal terakhir diperbarui
-  Product   Product[]
+  isActive  Boolean  @default(true) // Status aktif toko
+  createdAt DateTime @default(now()) // Tanggal pembuatan
+  updatedAt DateTime @updatedAt // Tanggal terakhir diperbarui
+
+  Product Product[]
+  Stock   Stock[]
 
   @@map("stores")
 }
@@ -103,66 +105,56 @@ model Product {
   storeId String?
   store   Store?  @relation(fields: [storeId], references: [id])
 
+  Stock Stock[]
+
   Variant Variant[]
 
   @@map("products")
 }
 
-model Attribute {
-  id     Int              @id @default(autoincrement())
-  name   String
-  values AttributeValue[] // Relasi ke tabel AttributeValue
-
-  @@map("attribute")
-}
-
-model AttributeValue {
-  id                Int                @id @default(autoincrement())
-  value             String
-  attribute         Attribute          @relation(fields: [attributeId], references: [id])
-  attributeId       Int
-  variantAttributes VariantAttribute[] // Relasi ke tabel VariantAttribute
-
-  @@map("attribute_value")
-}
-
 model Variant {
-  id             Int                @id @default(autoincrement())
+  id             String             @id @default(cuid())
+  name           String
   product        Product            @relation(fields: [productId], references: [id])
   productId      String
-  price          Float
   attributes     VariantAttribute[] // Relasi ke tabel VariantAttribute
-  Stock          Stock[]
   WholesalePrice WholesalePrice[]
 
   @@map("variant")
 }
 
 model VariantAttribute {
-  variant          Variant        @relation(fields: [variantId], references: [id])
-  variantId        Int
-  attributeValue   AttributeValue @relation(fields: [attributeValueId], references: [id])
-  attributeValueId Int
+  id        String  @id @default(cuid())
+  variant   Variant @relation(fields: [variantId], references: [id])
+  variantId String
+  name      String
+  Price     String
+  Stock     Stock?
 
-  @@id([variantId, attributeValueId]) // Kombinasi unik untuk mencegah duplikasi
   @@map("variant_attribute")
 }
 
 model Stock {
-  id          Int       @id @default(autoincrement())
-  variant     Variant   @relation(fields: [variantId], references: [id])
-  variantId   Int
-  warehouse   Warehouse @relation(fields: [warehouseId], references: [id])
-  warehouseId String
-  quantity    Int // Jumlah stok di lokasi ini
+  id String @id @default(cuid())
 
-  @@unique([variantId, warehouseId]) // Kombinasi unik varian dan lokasi
+  warehouse   Warehouse? @relation(fields: [warehouseId], references: [id])
+  warehouseId String?
+
+  store   Store?  @relation(fields: [storeId], references: [id])
+  storeId String?
+
+  quantity Int @default(0) // Jumlah stok di lokasi ini
+
+  Product            Product?         @relation(fields: [productId], references: [id])
+  variantAttributeId String           @unique
+  VariantAttribute   VariantAttribute @relation(references: [id], fields: [variantAttributeId])
+  productId          String?
 }
 
 model WholesalePrice {
-  id          Int     @id @default(autoincrement())
+  id          String  @id @default(cuid())
   variant     Variant @relation(fields: [variantId], references: [id])
-  variantId   Int
+  variantId   String
   minQuantity Int // Jumlah minimum pembelian
   price       Float // Harga per unit untuk pembelian grosir
 

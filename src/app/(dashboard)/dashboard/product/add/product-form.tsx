@@ -44,6 +44,7 @@ import * as z from "zod";
 const formSchema = z.object({
   name: z.string(),
   description: z.string(),
+  sku: z.string().optional(),
   price: z.number(),
   stock: z.number(),
   available: z.boolean().optional(),
@@ -83,10 +84,13 @@ export default function ProductForm({
         name: values.name,
         price: values.price,
         description: values.description,
-        sku: "",
+        sku: values.sku
+          ? values.sku
+          : values.name.replace(/\s+/g, "").slice(0, 5).toUpperCase() +
+            Date.now().toString(),
         warehouse: {
           connect: {
-            id: "cm5556igv0003hh84e1rxpdoh",
+            id: "cm563d19u0001hhaw84szwdnb",
           },
         },
         category: {

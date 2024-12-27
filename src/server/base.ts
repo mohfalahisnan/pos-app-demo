@@ -26,6 +26,14 @@ export type PaginatedResult<T> = {
   totalPages: number;
 };
 
+export type PaginateOption = {
+  page?: number;
+  pageSize?: number;
+  orderBy?: Prisma.Args<PrismaClient, "findMany">["orderBy"];
+  where?: Prisma.Args<PrismaClient, "findMany">["where"];
+  select?: Prisma.Args<PrismaClient, "findMany">["select"];
+};
+
 /**
  * Soft deletes an entity in the database by setting the 'deleted' field to the current timestamp.
  *

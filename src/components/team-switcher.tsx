@@ -18,13 +18,17 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-import {
-  getSelectedWarehouse,
-  getWarehouses,
-  setSelectedWarehouse,
-} from "@/Storage/Data";
+import { getSelectedWarehouse, setSelectedWarehouse } from "@/Storage/Data";
 
+import { queryClient } from "@/app/query-provider";
+import { useToast } from "@/hooks/use-toast";
+import { addWarehouse, getWarehouses } from "@/server/warehouse";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Prisma } from "@prisma/client";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 import { Button } from "./ui/button";
 import {
   Dialog,
@@ -37,15 +41,22 @@ import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 
 export function TeamSwitcher() {
-  const [isAdd, setIsAdd] = React.useState(false);
   const { isMobile } = useSidebar();
-  const warehouses = getWarehouses();
+  const [isAdd, setIsAdd] = React.useState(false);
+  const data = useQuery({
+    queryKey: ["warehouses"],
+    queryFn: async () => await getWarehouses(),
+  });
+  const warehouses = data.data;
+
   const selectedWarehouse = getSelectedWarehouse();
-  const [warehouse, setWarehouse] = React.useState(selectedWarehouse);
+  const [warehouse, setWarehouse] = React.useState<string | null>(
+    selectedWarehouse
+  );
   const router = useRouter();
 
   React.useEffect(() => {
-    if (warehouse) setSelectedWarehouse(warehouse.id);
+    if (warehouse) setSelectedWarehouse(warehouse);
     router.refresh();
   }, [warehouse]);
 
@@ -62,6 +73,7 @@ export function TeamSwitcher() {
         <ChevronsUpDown className="ml-auto" />
       </SidebarMenuButton>
     );
+
   return (
     <>
       <SidebarMenu>
@@ -76,14 +88,16 @@ export function TeamSwitcher() {
                   <AtomIcon className="size-4" />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">
+                  <span className="truncate font-semibold capitalize">
                     {selectedWarehouse
-                      ? selectedWarehouse?.name
+                      ? warehouses.find((val) => val.id === selectedWarehouse)
+                          ?.name
                       : warehouses[0].name}
                   </span>
-                  <span className="truncate text-xs">
+                  <span className="truncate text-xs capitalize">
                     {selectedWarehouse
-                      ? selectedWarehouse?.location
+                      ? warehouses.find((val) => val.id === selectedWarehouse)
+                          ?.location
                       : warehouses[0].location}
                   </span>
                 </div>
@@ -102,7 +116,7 @@ export function TeamSwitcher() {
               {warehouses.map((warehouse) => (
                 <DropdownMenuItem
                   key={warehouse.name}
-                  onClick={() => setWarehouse(warehouse)}
+                  onClick={() => setWarehouse(warehouse.id)}
                   className="gap-2 p-2"
                 >
                   <div className="flex size-6 items-center justify-center rounded-sm border">
@@ -123,34 +137,130 @@ export function TeamSwitcher() {
         </SidebarMenuItem>
       </SidebarMenu>
 
-      <Dialog onOpenChange={setIsAdd} open={isAdd}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Add Warehouse</DialogTitle>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="name" className="text-right">
-                Name
-              </Label>
-              <Input
-                id="name"
-                value="Example Warehouse"
-                className="col-span-3"
-              />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="location" className="text-right">
-                Location
-              </Label>
-              <Input id="location" value="location" className="col-span-3" />
-            </div>
+      <DialogAddWarehouse isAdd={isAdd} setIsAdd={setIsAdd} />
+    </>
+  );
+}
+
+// Schema validasi dengan Zod
+const warehouseSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  code: z.string().min(1, "Code is required"),
+  location: z.string().min(1, "Location is required"),
+});
+
+type WarehouseFormValues = z.infer<typeof warehouseSchema>;
+
+const DialogAddWarehouse = ({
+  isAdd,
+  setIsAdd,
+}: {
+  isAdd: boolean;
+  setIsAdd: React.Dispatch<React.SetStateAction<boolean>>;
+}) => {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<WarehouseFormValues>({
+    resolver: zodResolver(warehouseSchema),
+    defaultValues: {
+      name: "",
+      location: "",
+    },
+  });
+  const router = useRouter();
+  const { toast } = useToast();
+  const warehouseMutation = useMutation({
+    mutationFn: async (data: Prisma.WarehouseCreateInput) =>
+      await addWarehouse(data),
+    onSuccess: () => {
+      toast({
+        description: "Warehouse Added!",
+      });
+      queryClient.invalidateQueries({ queryKey: ["warehouses"] });
+    },
+  });
+
+  const onSubmit = async (data: WarehouseFormValues) => {
+    console.log("Submitted Data:", data);
+    try {
+      const res = warehouseMutation.mutate({
+        ...data,
+      });
+      setIsAdd(false);
+      router.refresh();
+      return res;
+    } catch (error) {
+      console.log(error);
+      setIsAdd(false);
+      toast({
+        title: "Error",
+        description: "Failed to create warehouse!",
+        variant: "destructive",
+      });
+    }
+  };
+  return (
+    <Dialog onOpenChange={setIsAdd} open={isAdd}>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>Add Warehouse</DialogTitle>
+        </DialogHeader>
+        <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4 py-4">
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="name" className="text-right">
+              Name
+            </Label>
+            <Input
+              id="name"
+              {...register("name")}
+              className="col-span-3"
+              placeholder="Example Warehouse"
+            />
+            {errors.name && (
+              <p className="col-span-4 text-red-500 text-sm">
+                {errors.name.message}
+              </p>
+            )}
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="code" className="text-right">
+              Code
+            </Label>
+            <Input
+              id="code"
+              {...register("code")}
+              className="col-span-3"
+              placeholder="Example WRH1"
+            />
+            {errors.code && (
+              <p className="col-span-4 text-red-500 text-sm">
+                {errors.code.message}
+              </p>
+            )}
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="location" className="text-right">
+              Location
+            </Label>
+            <Input
+              id="location"
+              {...register("location")}
+              className="col-span-3"
+              placeholder="Location"
+            />
+            {errors.location && (
+              <p className="col-span-4 text-red-500 text-sm">
+                {errors.location.message}
+              </p>
+            )}
           </div>
           <DialogFooter>
             <Button type="submit">Save</Button>
           </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
-}
+};

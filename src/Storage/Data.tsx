@@ -1,4 +1,5 @@
 "use client";
+
 // Tipe data untuk item yang akan disimpan
 export interface Product {
   id: string;
@@ -92,109 +93,8 @@ export const initializeData = (): void => {
   }
 };
 
-// Panggil fungsi inisialisasi saat pertama kali script dijalankan
-// initializeData();
-
-// Mengambil semua data produk dari localStorage
-export const getProducts = (): Product[] => {
-  if (typeof window === "undefined" || !window.localStorage) return [];
-  const data = localStorage.getItem(PRODUCT_STORAGE_KEY);
-  return data ? JSON.parse(data) : [];
-};
-
-// Menambahkan item produk baru ke localStorage
-export const addProduct = (product: Omit<Product, "id">): void => {
-  if (typeof window === "undefined" || !window.localStorage) return;
-  const products = getProducts();
-  const newProduct = { ...product, id: generateUniqueId() };
-  products.push(newProduct);
-  localStorage.setItem(PRODUCT_STORAGE_KEY, JSON.stringify(products));
-};
-
-export const getProductById = (id: string): Product => {
-  const products = getProducts();
-  const productIndex = products.findIndex((item) => item.id === id);
-  return products[productIndex];
-};
-
-// Mengupdate item produk berdasarkan ID
-export const updateProduct = (
-  id: string,
-  updatedProduct: Partial<Product>
-): void => {
-  if (typeof window === "undefined" || !window.localStorage) return;
-  const products = getProducts();
-  const productIndex = products.findIndex((product) => product.id === id);
-
-  if (productIndex !== -1) {
-    products[productIndex] = { ...products[productIndex], ...updatedProduct };
-    localStorage.setItem(PRODUCT_STORAGE_KEY, JSON.stringify(products));
-  } else {
-    throw new Error("Product not found");
-  }
-};
-
-// Menghapus item produk berdasarkan ID
-export const deleteProduct = (id: string): void => {
-  if (typeof window === "undefined" || !window.localStorage) return;
-  const products = getProducts();
-  const filteredProducts = products.filter((product) => product.id !== id);
-  localStorage.setItem(PRODUCT_STORAGE_KEY, JSON.stringify(filteredProducts));
-};
-
-// Mengambil semua data warehouse dari localStorage
-export const getWarehouses = (): Warehouse[] => {
-  if (typeof window === "undefined" || !window.localStorage) return [];
-  const data = localStorage.getItem(WAREHOUSE_STORAGE_KEY);
-  return data ? JSON.parse(data) : [];
-};
-
-// Menambahkan warehouse baru ke localStorage
-export const addWarehouse = (warehouse: Omit<Warehouse, "id">): void => {
-  if (typeof window === "undefined" || !window.localStorage) return;
-  const warehouses = getWarehouses();
-  const newWarehouse = { ...warehouse, id: generateUniqueId() };
-  warehouses.push(newWarehouse);
-  localStorage.setItem(WAREHOUSE_STORAGE_KEY, JSON.stringify(warehouses));
-};
-
-// Mengupdate warehouse berdasarkan ID
-export const updateWarehouse = (
-  id: string,
-  updatedWarehouse: Partial<Warehouse>
-): void => {
-  if (typeof window === "undefined" || !window.localStorage) return;
-  const warehouses = getWarehouses();
-  const warehouseIndex = warehouses.findIndex(
-    (warehouse) => warehouse.id === id
-  );
-
-  if (warehouseIndex !== -1) {
-    warehouses[warehouseIndex] = {
-      ...warehouses[warehouseIndex],
-      ...updatedWarehouse,
-    };
-    localStorage.setItem(WAREHOUSE_STORAGE_KEY, JSON.stringify(warehouses));
-  } else {
-    throw new Error("Warehouse not found");
-  }
-};
-
-// Menghapus warehouse berdasarkan ID
-export const deleteWarehouse = (id: string): void => {
-  if (typeof window === "undefined" || !window.localStorage) return;
-  const warehouses = getWarehouses();
-  const filteredWarehouses = warehouses.filter(
-    (warehouse) => warehouse.id !== id
-  );
-  localStorage.setItem(
-    WAREHOUSE_STORAGE_KEY,
-    JSON.stringify(filteredWarehouses)
-  );
-};
-
 // Mendapatkan warehouse yang dipilih
-export const getSelectedWarehouse = (): Warehouse | null => {
+export const getSelectedWarehouse = (): string | null => {
   if (typeof window === "undefined" || !window.localStorage) return null;
   const data = localStorage.getItem(SELECTED_WAREHOUSE_KEY);
   return data ? JSON.parse(data) : null;
@@ -202,16 +102,5 @@ export const getSelectedWarehouse = (): Warehouse | null => {
 
 export const setSelectedWarehouse = (warehouseId: string): void => {
   if (typeof window === "undefined" || !window.localStorage) return;
-  const warehouses = getWarehouses();
-  const selectedWarehouse = warehouses.find(
-    (warehouse) => warehouse.id === warehouseId
-  );
-  if (selectedWarehouse) {
-    localStorage.setItem(
-      SELECTED_WAREHOUSE_KEY,
-      JSON.stringify(selectedWarehouse)
-    );
-  } else {
-    throw new Error("Warehouse not found");
-  }
+  localStorage.setItem(SELECTED_WAREHOUSE_KEY, JSON.stringify(warehouseId));
 };

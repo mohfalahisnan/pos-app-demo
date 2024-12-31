@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/sidebar";
 import { LogoutButton } from "./auth-button";
 import { NavProjects } from "./nav-projects";
-import { TeamSwitcher } from "./team-switcher";
+import { StoreSwithcer } from "./store-switcher";
 
 // This is sample data.
 const data = {
@@ -121,7 +121,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
-        <TeamSwitcher />
+        {/* <TeamSwitcher /> */}
+        <StoreSwithcer />
       </SidebarHeader>
       <SidebarContent>
         <NavProjects projects={data.projects} />

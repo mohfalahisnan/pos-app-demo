@@ -22,7 +22,7 @@ import { getSelectedStore, setSelectedStore } from "@/Storage/Data";
 
 import { queryClient } from "@/app/query-provider";
 import { useToast } from "@/hooks/use-toast";
-import { addWarehouse, getWarehouses } from "@/server/warehouse";
+import { addStore, getStores } from "@/server/store";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Prisma } from "@prisma/client";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -40,27 +40,28 @@ import {
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 
-export function TeamSwitcher() {
+export function StoreSwithcer() {
   const { isMobile } = useSidebar();
   const [isAdd, setIsAdd] = React.useState(false);
   const data = useQuery({
-    queryKey: ["warehouses"],
-    queryFn: async () => await getWarehouses(),
+    queryKey: ["stores"],
+    queryFn: async () => await getStores(),
   });
-  const warehouses = data.data;
+  const stores = data.data;
 
-  const selectedWarehouse = getSelectedStore();
-  const [warehouse, setWarehouse] = React.useState<string | null>(
-    selectedWarehouse
-  );
+  const selectedStore = getSelectedStore();
+  const [store, setStore] = React.useState<string | null>(selectedStore);
   const router = useRouter();
 
   React.useEffect(() => {
-    if (warehouse) setSelectedStore(warehouse);
+    if (stores) {
+      if (selectedStore === null) setSelectedStore(stores[0].id);
+    }
+    if (store) setSelectedStore(store);
     router.refresh();
-  }, [warehouse]);
+  }, [store]);
 
-  if (!warehouses || !selectedWarehouse)
+  if (!stores)
     return (
       <SidebarMenuButton className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground h-12">
         <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
@@ -89,16 +90,14 @@ export function TeamSwitcher() {
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-semibold capitalize">
-                    {selectedWarehouse
-                      ? warehouses.find((val) => val.id === selectedWarehouse)
-                          ?.name
-                      : warehouses[0].name}
+                    {selectedStore
+                      ? stores.find((val) => val.id === selectedStore)?.name
+                      : stores[0].name}
                   </span>
                   <span className="truncate text-xs capitalize">
-                    {selectedWarehouse
-                      ? warehouses.find((val) => val.id === selectedWarehouse)
-                          ?.location
-                      : warehouses[0].location}
+                    {selectedStore
+                      ? stores.find((val) => val.id === selectedStore)?.location
+                      : stores[0].location}
                   </span>
                 </div>
                 <ChevronsUpDown className="ml-auto" />
@@ -113,16 +112,16 @@ export function TeamSwitcher() {
               <DropdownMenuLabel className="text-xs text-muted-foreground">
                 Warehouse
               </DropdownMenuLabel>
-              {warehouses.map((warehouse) => (
+              {stores.map((store) => (
                 <DropdownMenuItem
-                  key={warehouse.name}
-                  onClick={() => setWarehouse(warehouse.id)}
+                  key={store.name}
+                  onClick={() => setStore(store.id)}
                   className="gap-2 p-2"
                 >
                   <div className="flex size-6 items-center justify-center rounded-sm border">
                     <AtomIcon className="size-4 shrink-0" />
                   </div>
-                  {warehouse.name}
+                  {store.name}
                 </DropdownMenuItem>
               ))}
               <DropdownMenuSeparator />
@@ -130,28 +129,28 @@ export function TeamSwitcher() {
                 onClick={() => setIsAdd(true)}
                 className="flex items-center gap-2 p-2"
               >
-                <Plus size={20} /> <div className="mt-0.5">Add Warehouse</div>
+                <Plus size={20} /> <div className="mt-0.5">Add Store</div>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </SidebarMenuItem>
       </SidebarMenu>
 
-      <DialogAddWarehouse isAdd={isAdd} setIsAdd={setIsAdd} />
+      <DialogAddStore isAdd={isAdd} setIsAdd={setIsAdd} />
     </>
   );
 }
 
 // Schema validasi dengan Zod
-const warehouseSchema = z.object({
+const storeSchema = z.object({
   name: z.string().min(1, "Name is required"),
   code: z.string().min(1, "Code is required"),
   location: z.string().min(1, "Location is required"),
 });
 
-type WarehouseFormValues = z.infer<typeof warehouseSchema>;
+type StoreFormValues = z.infer<typeof storeSchema>;
 
-const DialogAddWarehouse = ({
+const DialogAddStore = ({
   isAdd,
   setIsAdd,
 }: {
@@ -162,8 +161,9 @@ const DialogAddWarehouse = ({
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<WarehouseFormValues>({
-    resolver: zodResolver(warehouseSchema),
+    reset,
+  } = useForm<StoreFormValues>({
+    resolver: zodResolver(storeSchema),
     defaultValues: {
       name: "",
       location: "",
@@ -171,21 +171,25 @@ const DialogAddWarehouse = ({
   });
   const router = useRouter();
   const { toast } = useToast();
-  const warehouseMutation = useMutation({
-    mutationFn: async (data: Prisma.WarehouseCreateInput) =>
-      await addWarehouse(data),
+  const storeMutation = useMutation({
+    mutationFn: async (data: Prisma.StoreCreateInput) => await addStore(data),
     onSuccess: () => {
       toast({
-        description: "Warehouse Added!",
+        description: "Store Added!",
       });
-      queryClient.invalidateQueries({ queryKey: ["warehouses"] });
+      reset({
+        name: "",
+        code: "",
+        location: "",
+      });
+      queryClient.invalidateQueries({ queryKey: ["stores"] });
     },
   });
 
-  const onSubmit = async (data: WarehouseFormValues) => {
+  const onSubmit = async (data: StoreFormValues) => {
     console.log("Submitted Data:", data);
     try {
-      const res = warehouseMutation.mutate({
+      const res = storeMutation.mutate({
         ...data,
       });
       setIsAdd(false);
@@ -196,7 +200,7 @@ const DialogAddWarehouse = ({
       setIsAdd(false);
       toast({
         title: "Error",
-        description: "Failed to create warehouse!",
+        description: "Failed to create store!",
         variant: "destructive",
       });
     }
@@ -205,7 +209,7 @@ const DialogAddWarehouse = ({
     <Dialog onOpenChange={setIsAdd} open={isAdd}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Add Warehouse</DialogTitle>
+          <DialogTitle>Add Store</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4 py-4">
           <div className="grid grid-cols-4 items-center gap-4">
@@ -216,7 +220,7 @@ const DialogAddWarehouse = ({
               id="name"
               {...register("name")}
               className="col-span-3"
-              placeholder="Example Warehouse"
+              placeholder="Example Toko Sepatu"
             />
             {errors.name && (
               <p className="col-span-4 text-red-500 text-sm">

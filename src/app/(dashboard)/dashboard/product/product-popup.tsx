@@ -10,13 +10,13 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { getProductById } from "@/server/product";
-import { getSelectedWarehouse } from "@/Storage/Data";
+import { getSelectedStore } from "@/Storage/Data";
 import { Prisma, Product } from "@prisma/client";
 import { useQuery } from "@tanstack/react-query";
 import Image from "next/image";
 
 function ProductPopup({ item }: { item: Product }) {
-  const warehouseId = getSelectedWarehouse();
+  const warehouseId = getSelectedStore();
   const detail = useQuery({
     queryKey: ["product-detail", item.id],
     queryFn: async () =>

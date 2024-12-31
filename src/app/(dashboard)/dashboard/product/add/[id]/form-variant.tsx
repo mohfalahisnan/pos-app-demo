@@ -5,7 +5,7 @@ import { Form } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useProduct, useProductMutation } from "@/hooks/product";
 import { InputVariantProduct } from "@/server/product";
-import { getSelectedWarehouse } from "@/Storage/Data";
+import { getSelectedStore } from "@/Storage/Data";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader, Plus, Trash } from "lucide-react";
 import { useFieldArray, useForm } from "react-hook-form";
@@ -28,7 +28,7 @@ const formSchema = z.object({
 
 function FormVariant({ id }: { id: string }) {
   const product = useProduct(id);
-  const warehouseId = getSelectedWarehouse();
+  const warehouseId = getSelectedStore();
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {

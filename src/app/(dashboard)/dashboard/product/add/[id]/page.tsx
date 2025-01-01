@@ -1,4 +1,4 @@
-import FormVariant from "./form-variant";
+import FormVariant from './form-variant';
 
 function VariantPage({ params: { id } }: { params: { id: string } }) {
   return (

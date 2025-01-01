@@ -1,21 +1,11 @@
 // This file defines the BaseEntity class which extends PrismaClient to provide common database operations.
 // It includes a method to get a model delegate and a method for paginated find operations.
 
-import { Prisma, PrismaClient } from "@prisma/client";
+import { Prisma, PrismaClient } from '@prisma/client';
 
 export type Models = keyof Omit<
   PrismaClient,
-  | symbol
-  | "$connect"
-  | "$use"
-  | "$on"
-  | "$disconnect"
-  | "$executeRaw"
-  | "$executeRawUnsafe"
-  | "$queryRaw"
-  | "$queryRawUnsafe"
-  | "$transaction"
-  | "$extends"
+  symbol | '$connect' | '$use' | '$on' | '$disconnect' | '$executeRaw' | '$executeRawUnsafe' | '$queryRaw' | '$queryRawUnsafe' | '$transaction' | '$extends'
 >;
 
 export type PaginatedResult<T> = {
@@ -29,9 +19,9 @@ export type PaginatedResult<T> = {
 export type PaginateOption = {
   page?: number;
   pageSize?: number;
-  orderBy?: Prisma.Args<PrismaClient, "findMany">["orderBy"];
-  where?: Prisma.Args<PrismaClient, "findMany">["where"];
-  select?: Prisma.Args<PrismaClient, "findMany">["select"];
+  orderBy?: Prisma.Args<PrismaClient, 'findMany'>['orderBy'];
+  where?: Prisma.Args<PrismaClient, 'findMany'>['where'];
+  select?: Prisma.Args<PrismaClient, 'findMany'>['select'];
 };
 
 /**
@@ -40,16 +30,13 @@ export type PaginateOption = {
  * @param where - The condition to find the entity to be soft deleted.
  * @returns A promise that resolves to the updated entity.
  */
-async function softDelete<T>(
-  this: T,
-  where?: Prisma.Args<T, "update">["where"]
-) {
+async function softDelete<T>(this: T, where?: Prisma.Args<T, 'update'>['where']) {
   const context = Prisma.getExtensionContext(this);
   const result = await (context as any).update({
     where,
     data: {
-      deleted: new Date(),
-    },
+      deleted: new Date()
+    }
   });
   return result;
 }
@@ -60,16 +47,13 @@ async function softDelete<T>(
  * @param where - The condition to find the entities to be soft deleted.
  * @returns A promise that resolves to the count of updated entities.
  */
-async function softDeleteMany<T>(
-  this: T,
-  where?: Prisma.Args<T, "updateMany">["where"]
-) {
+async function softDeleteMany<T>(this: T, where?: Prisma.Args<T, 'updateMany'>['where']) {
   const context = Prisma.getExtensionContext(this);
   const result = await (context as any).updateMany({
     where,
     data: {
-      deleted: new Date(),
-    },
+      deleted: new Date()
+    }
   });
   return result.count;
 }
@@ -81,11 +65,7 @@ async function softDeleteMany<T>(
  * @param select - The fields to select from the entity.
  * @returns A promise that resolves to a boolean indicating whether the entity exists.
  */
-async function exists<T>(
-  this: T,
-  where: Prisma.Args<T, "findFirst">["where"],
-  select: Prisma.Args<T, "findMany">["select"]
-): Promise<boolean> {
+async function exists<T>(this: T, where: Prisma.Args<T, 'findFirst'>['where'], select: Prisma.Args<T, 'findMany'>['select']): Promise<boolean> {
   const context = Prisma.getExtensionContext(this);
 
   const result = await (context as any).findFirst({ where, select });
@@ -120,13 +100,13 @@ async function paginateFindMany<T>(
     pageSize = 10,
     orderBy,
     where,
-    select,
+    select
   }: {
     page?: number;
     pageSize?: number;
-    orderBy?: Prisma.Args<T, "findMany">["orderBy"];
-    where?: Prisma.Args<T, "findMany">["where"];
-    select?: Prisma.Args<T, "findMany">["select"];
+    orderBy?: Prisma.Args<T, 'findMany'>['orderBy'];
+    where?: Prisma.Args<T, 'findMany'>['where'];
+    select?: Prisma.Args<T, 'findMany'>['select'];
   }
 ): Promise<PaginatedResult<T>> {
   const skip = (page - 1) * pageSize;
@@ -139,11 +119,11 @@ async function paginateFindMany<T>(
       take,
       orderBy,
       where,
-      select: select,
+      select: select
     }),
     (context as any).count({
-      where,
-    }),
+      where
+    })
   ]);
 
   return {
@@ -151,7 +131,7 @@ async function paginateFindMany<T>(
     total,
     page,
     pageSize,
-    totalPages: Math.ceil(total / pageSize),
+    totalPages: Math.ceil(total / pageSize)
   };
 }
 
@@ -162,9 +142,9 @@ export default class BaseEntity extends PrismaClient {
         softDelete,
         softDeleteMany,
         exists,
-        paginateFindMany,
-      },
-    },
+        paginateFindMany
+      }
+    }
   });
 }
 
@@ -174,7 +154,7 @@ export const entities = new PrismaClient().$extends({
       softDelete,
       softDeleteMany,
       exists,
-      paginateFindMany,
-    },
-  },
+      paginateFindMany
+    }
+  }
 });

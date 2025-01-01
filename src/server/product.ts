@@ -1,7 +1,9 @@
-"use server";
-import { prisma } from "@/lib/prisma";
-import { Prisma, Product } from "@prisma/client";
-import { entities, PaginatedResult, PaginateOption } from "./base";
+'use server';
+import { Prisma, Product } from '@prisma/client';
+
+import { prisma } from '@/lib/prisma';
+
+import { entities, PaginatedResult, PaginateOption } from './base';
 
 export async function getProducts(data: PaginateOption) {
   try {
@@ -16,7 +18,7 @@ export async function getProducts(data: PaginateOption) {
 export async function addProduct(data: Prisma.ProductCreateInput) {
   try {
     const product = await prisma.product.create({
-      data,
+      data
     });
     return product;
   } catch (error) {
@@ -34,16 +36,13 @@ export async function getCategories() {
   }
 }
 
-export async function getProductById(
-  id: string,
-  include?: Prisma.ProductInclude
-) {
+export async function getProductById(id: string, include?: Prisma.ProductInclude) {
   try {
     const product = await prisma.product.findUnique({
       where: {
-        id,
+        id
       },
-      include,
+      include
     });
     return product;
   } catch (error) {
@@ -63,22 +62,14 @@ export type InputVariantProduct = {
   }[];
 };
 
-export async function addVariantProduct({
-  productId,
-  warehouseId,
-  data,
-}: {
-  productId: string;
-  warehouseId: string;
-  data: InputVariantProduct;
-}) {
+export async function addVariantProduct({ productId, warehouseId, data }: { productId: string; warehouseId: string; data: InputVariantProduct }) {
   try {
     for (const variantData of data.variant) {
       const variant = await prisma.variant.create({
         data: {
           name: variantData.name,
-          productId: productId,
-        },
+          productId: productId
+        }
       });
 
       for (const variantAttribute of variantData.attributes) {
@@ -89,23 +80,24 @@ export async function addVariantProduct({
               create: {
                 name: variantAttribute.name,
                 Price: variantAttribute.price,
-                variantId: variant.id,
-              },
+                variantId: variant.id
+              }
             },
             Product: {
               connect: {
-                id: productId,
-              },
+                id: productId
+              }
             },
             warehouse: {
               connect: {
-                id: warehouseId, //warehouseId
-              },
-            },
-          },
+                id: warehouseId //warehouseId
+              }
+            }
+          }
         });
       }
     }
+    return await prisma.product.findUnique({ where: { id: productId } });
   } catch (error) {
     console.log(error);
     throw new Error();

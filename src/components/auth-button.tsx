@@ -1,28 +1,21 @@
-"use client";
+'use client';
 
-import { signIn, signOut, useSession } from "next-auth/react";
-import Link from "next/link";
-import { Button } from "./ui/button";
+import Link from 'next/link';
+import { signIn, signOut, useSession } from 'next-auth/react';
+
+import { Button } from './ui/button';
 
 export const LoginButton = () => {
   const session = useSession();
-  if (!session || session.status === "unauthenticated") {
+  if (!session || session.status === 'unauthenticated') {
     return (
-      <Button
-        variant={"secondary"}
-        style={{ marginRight: 10 }}
-        onClick={() => signIn()}
-      >
+      <Button variant={'secondary'} style={{ marginRight: 10 }} onClick={() => signIn()}>
         Sign in
       </Button>
     );
   }
   return (
-    <Button
-      variant={"secondary"}
-      style={{ marginRight: 10 }}
-      onClick={() => signOut()}
-    >
+    <Button variant={'secondary'} style={{ marginRight: 10 }} onClick={() => signOut()}>
       Sign Out
     </Button>
   );

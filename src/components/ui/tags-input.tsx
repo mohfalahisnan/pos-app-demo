@@ -1,11 +1,11 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-"use client";
+'use client';
 
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { cn } from "@/lib/utils";
-import { X as RemoveIcon } from "lucide-react";
-import React from "react";
+import { X as RemoveIcon } from 'lucide-react';
+import React from 'react';
+
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { cn } from '@/lib/utils';
 
 /**
  * used for identifying the split char and use will pasting
@@ -28,7 +28,6 @@ interface TagsInputProps extends React.HTMLAttributes<HTMLDivElement> {
 
 interface TagsInputContextProps {
   value: string[];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onValueChange: (value: any) => void;
   inputValue: string;
   setInputValue: React.Dispatch<React.SetStateAction<string>>;
@@ -39,26 +38,13 @@ interface TagsInputContextProps {
 const TagInputContext = React.createContext<TagsInputContextProps | null>(null);
 
 export const TagsInput = React.forwardRef<HTMLDivElement, TagsInputProps>(
-  (
-    {
-      children,
-      value,
-      onValueChange,
-      placeholder,
-      maxItems,
-      minItems,
-      className,
-      dir,
-      ...props
-    },
-    ref
-  ) => {
+  ({ children, value, onValueChange, placeholder, maxItems, minItems, className, dir, ...props }, ref) => {
     const [activeIndex, setActiveIndex] = React.useState(-1);
-    const [inputValue, setInputValue] = React.useState("");
+    const [inputValue, setInputValue] = React.useState('');
     const [disableInput, setDisableInput] = React.useState(false);
     const [disableButton, setDisableButton] = React.useState(false);
     const [isValueSelected, setIsValueSelected] = React.useState(false);
-    const [selectedValue, setSelectedValue] = React.useState("");
+    const [selectedValue, setSelectedValue] = React.useState('');
 
     const parseMinItems = minItems ?? 0;
     const parseMaxItems = maxItems ?? Infinity;
@@ -75,7 +61,7 @@ export const TagsInput = React.forwardRef<HTMLDivElement, TagsInputProps>(
     const RemoveValue = React.useCallback(
       (val: string) => {
         if (value.includes(val) && value.length > parseMinItems) {
-          onValueChange(value.filter((item) => item !== val));
+          onValueChange(value.filter(item => item !== val));
         }
       },
       [value]
@@ -84,20 +70,16 @@ export const TagsInput = React.forwardRef<HTMLDivElement, TagsInputProps>(
     const handlePaste = React.useCallback(
       (e: React.ClipboardEvent<HTMLInputElement>) => {
         e.preventDefault();
-        const tags = e.clipboardData.getData("text").split(SPLITTER_REGEX);
+        const tags = e.clipboardData.getData('text').split(SPLITTER_REGEX);
         const newValue = [...value];
-        tags.forEach((item) => {
-          const parsedItem = item.replaceAll(FORMATTING_REGEX, "").trim();
-          if (
-            parsedItem.length > 0 &&
-            !newValue.includes(parsedItem) &&
-            newValue.length < parseMaxItems
-          ) {
+        tags.forEach(item => {
+          const parsedItem = item.replaceAll(FORMATTING_REGEX, '').trim();
+          if (parsedItem.length > 0 && !newValue.includes(parsedItem) && newValue.length < parseMaxItems) {
             newValue.push(parsedItem);
           }
         });
         onValueChange(newValue);
-        setInputValue("");
+        setInputValue('');
       },
       [value]
     );
@@ -106,10 +88,7 @@ export const TagsInput = React.forwardRef<HTMLDivElement, TagsInputProps>(
       (e: React.SyntheticEvent<HTMLInputElement>) => {
         e.preventDefault();
         const target = e.currentTarget;
-        const selection = target.value.substring(
-          target.selectionStart ?? 0,
-          target.selectionEnd ?? 0
-        );
+        const selection = target.value.substring(target.selectionStart ?? 0, target.selectionEnd ?? 0);
 
         setSelectedValue(selection);
         setIsValueSelected(selection === inputValue);
@@ -148,24 +127,17 @@ export const TagsInput = React.forwardRef<HTMLDivElement, TagsInputProps>(
         e.stopPropagation();
 
         const moveNext = () => {
-          const nextIndex =
-            activeIndex + 1 > value.length - 1 ? -1 : activeIndex + 1;
+          const nextIndex = activeIndex + 1 > value.length - 1 ? -1 : activeIndex + 1;
           setActiveIndex(nextIndex);
         };
 
         const movePrev = () => {
-          const prevIndex =
-            activeIndex - 1 < 0 ? value.length - 1 : activeIndex - 1;
+          const prevIndex = activeIndex - 1 < 0 ? value.length - 1 : activeIndex - 1;
           setActiveIndex(prevIndex);
         };
 
         const moveCurrent = () => {
-          const newIndex =
-            activeIndex - 1 <= 0
-              ? value.length - 1 === 0
-                ? -1
-                : 0
-              : activeIndex - 1;
+          const newIndex = activeIndex - 1 <= 0 ? (value.length - 1 === 0 ? -1 : 0) : activeIndex - 1;
           setActiveIndex(newIndex);
         };
         const target = e.currentTarget;
@@ -173,8 +145,8 @@ export const TagsInput = React.forwardRef<HTMLDivElement, TagsInputProps>(
         // ? Suggest : the multi select should support the same pattern
 
         switch (e.key) {
-          case "ArrowLeft":
-            if (dir === "rtl") {
+          case 'ArrowLeft':
+            if (dir === 'rtl') {
               if (value.length > 0 && activeIndex !== -1) {
                 moveNext();
               }
@@ -185,8 +157,8 @@ export const TagsInput = React.forwardRef<HTMLDivElement, TagsInputProps>(
             }
             break;
 
-          case "ArrowRight":
-            if (dir === "rtl") {
+          case 'ArrowRight':
+            if (dir === 'rtl') {
               if (value.length > 0 && target.selectionStart === 0) {
                 movePrev();
               }
@@ -197,8 +169,8 @@ export const TagsInput = React.forwardRef<HTMLDivElement, TagsInputProps>(
             }
             break;
 
-          case "Backspace":
-          case "Delete":
+          case 'Backspace':
+          case 'Delete':
             if (value.length > 0) {
               if (activeIndex !== -1 && activeIndex < value.length) {
                 RemoveValue(value[activeIndex]);
@@ -213,16 +185,16 @@ export const TagsInput = React.forwardRef<HTMLDivElement, TagsInputProps>(
             }
             break;
 
-          case "Escape":
+          case 'Escape':
             const newIndex = activeIndex === -1 ? value.length - 1 : -1;
             setActiveIndex(newIndex);
             break;
 
-          case "Enter":
-            if (inputValue.trim() !== "") {
+          case 'Enter':
+            if (inputValue.trim() !== '') {
               e.preventDefault();
               onValueChangeHandler(inputValue);
-              setInputValue("");
+              setInputValue('');
             }
             break;
         }
@@ -235,12 +207,9 @@ export const TagsInput = React.forwardRef<HTMLDivElement, TagsInputProps>(
       e.stopPropagation();
     }, []);
 
-    const handleChange = React.useCallback(
-      (e: React.ChangeEvent<HTMLInputElement>) => {
-        setInputValue(e.currentTarget.value);
-      },
-      []
-    );
+    const handleChange = React.useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+      setInputValue(e.currentTarget.value);
+    }, []);
 
     return (
       <TagInputContext.Provider
@@ -250,7 +219,7 @@ export const TagsInput = React.forwardRef<HTMLDivElement, TagsInputProps>(
           inputValue,
           setInputValue,
           activeIndex,
-          setActiveIndex,
+          setActiveIndex
         }}
       >
         <div
@@ -258,9 +227,9 @@ export const TagsInput = React.forwardRef<HTMLDivElement, TagsInputProps>(
           ref={ref}
           dir={dir}
           className={cn(
-            "flex items-center flex-wrap gap-1 p-1 rounded-lg bg-background overflow-hidden   ring-1 ring-muted  ",
+            'flex items-center flex-wrap gap-1 p-1 rounded-lg bg-background overflow-hidden   ring-1 ring-muted  ',
             {
-              "focus-within:ring-ring": activeIndex === -1,
+              'focus-within:ring-ring': activeIndex === -1
             },
             className
           )}
@@ -274,7 +243,7 @@ export const TagsInput = React.forwardRef<HTMLDivElement, TagsInputProps>(
               className={cn(
                 "relative px-1 rounded flex items-center gap-1 data-[active='true']:ring-2 data-[active='true']:ring-muted-foreground truncate aria-disabled:opacity-50 aria-disabled:cursor-not-allowed"
               )}
-              variant={"secondary"}
+              variant={'secondary'}
             >
               <span className="text-xs">{item}</span>
               <button
@@ -303,8 +272,8 @@ export const TagsInput = React.forwardRef<HTMLDivElement, TagsInputProps>(
             placeholder={placeholder}
             onClick={() => setActiveIndex(-1)}
             className={cn(
-              "outline-0 border-none h-7 min-w-fit flex-1 focus-visible:outline-0 focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-0 placeholder:text-muted-foreground px-1",
-              activeIndex !== -1 && "caret-transparent"
+              'outline-0 border-none h-7 min-w-fit flex-1 focus-visible:outline-0 focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-0 placeholder:text-muted-foreground px-1',
+              activeIndex !== -1 && 'caret-transparent'
             )}
           />
         </div>
@@ -313,4 +282,4 @@ export const TagsInput = React.forwardRef<HTMLDivElement, TagsInputProps>(
   }
 );
 
-TagsInput.displayName = "TagsInput";
+TagsInput.displayName = 'TagsInput';

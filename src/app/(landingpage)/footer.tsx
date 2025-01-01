@@ -1,5 +1,5 @@
-import { Heart } from "lucide-react";
-import Link from "next/link";
+import { Heart } from 'lucide-react';
+import Link from 'next/link';
 
 const Footer = () => {
   return (
@@ -11,10 +11,7 @@ const Footer = () => {
             <h1 className="text-2xl font-bold">
               POS PRO <span className="text-xs">v1.0</span>
             </h1>
-            <p className="mt-2 ">
-              Solusi manajemen bisnis terbaik untuk meningkatkan produktivitas
-              dan efisiensi Anda.
-            </p>
+            <p className="mt-2 ">Solusi manajemen bisnis terbaik untuk meningkatkan produktivitas dan efisiensi Anda.</p>
           </div>
 
           {/* Navigation Links */}
@@ -59,15 +56,8 @@ const Footer = () => {
         {/* Copyright Section */}
         <div className="mt-8 border-t pt-4 text-center">
           <p className="text-sm">
-            Developed with love{" "}
-            <Heart
-              size={12}
-              className="inline -mt-0.5 mr-1"
-              fill="red"
-              stroke="red"
-            />
-            by Mavolo Studio. <br />© {new Date().getFullYear()} POS PRO. All
-            rights reserved.
+            Developed with love <Heart size={12} className="inline -mt-0.5 mr-1" fill="red" stroke="red" />
+            by Mavolo Studio. <br />© {new Date().getFullYear()} POS PRO. All rights reserved.
           </p>
         </div>
       </div>

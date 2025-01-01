@@ -1,23 +1,24 @@
-import { compare } from "bcryptjs";
-import type { NextAuthOptions } from "next-auth";
-import CredentialsProvider from "next-auth/providers/credentials";
-import GoogleCredentialProvider from "next-auth/providers/google";
-import { prisma } from "./prisma";
+import { compare } from 'bcryptjs';
+import type { NextAuthOptions } from 'next-auth';
+import CredentialsProvider from 'next-auth/providers/credentials';
+import GoogleCredentialProvider from 'next-auth/providers/google';
+
+import { prisma } from './prisma';
 
 export const authOptions: NextAuthOptions = {
   session: {
-    strategy: "jwt",
+    strategy: 'jwt'
   },
   providers: [
     CredentialsProvider({
-      name: "Sign in",
+      name: 'Sign in',
       credentials: {
         email: {
-          label: "Email",
-          type: "email",
-          placeholder: "example@example.com",
+          label: 'Email',
+          type: 'email',
+          placeholder: 'example@example.com'
         },
-        password: { label: "Password", type: "password" },
+        password: { label: 'Password', type: 'password' }
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials.password) {
@@ -26,14 +27,11 @@ export const authOptions: NextAuthOptions = {
 
         const user = await prisma.user.findUnique({
           where: {
-            email: credentials.email,
-          },
+            email: credentials.email
+          }
         });
 
-        if (
-          !user ||
-          !(await compare(credentials.password, user.password || ""))
-        ) {
+        if (!user || !(await compare(credentials.password, user.password || ''))) {
           return null;
         }
 
@@ -41,13 +39,13 @@ export const authOptions: NextAuthOptions = {
           id: user.id,
           email: user.email,
           name: user.firstName,
-          randomKey: "Some random Key",
+          randomKey: 'Some random Key'
         };
-      },
+      }
     }),
     GoogleCredentialProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID || "",
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
-    }),
-  ],
+      clientId: process.env.GOOGLE_CLIENT_ID || '',
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET || ''
+    })
+  ]
 };

@@ -1,29 +1,30 @@
-"use client";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Form } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { useProduct, useProductMutation } from "@/hooks/product";
-import { InputVariantProduct } from "@/server/product";
-import { getSelectedStore } from "@/Storage/Data";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader, Plus, Trash } from "lucide-react";
-import { useFieldArray, useForm } from "react-hook-form";
-import { z } from "zod";
+'use client';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Loader, Plus, Trash } from 'lucide-react';
+import { useFieldArray, useForm } from 'react-hook-form';
+import { z } from 'zod';
+
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Form } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { useProduct, useProductMutation } from '@/hooks/product';
+import { InputVariantProduct } from '@/server/product';
+import { getSelectedStore } from '@/Storage/Data';
 
 const formSchema = z.object({
   variant: z.array(
     z.object({
-      name: z.string().nonempty("Variant name is required"),
+      name: z.string().nonempty('Variant name is required'),
       attributes: z.array(
         z.object({
-          name: z.string().nonempty("Attribute name is required"),
-          price: z.string().regex(/^\d+$/, "Price must be a number"),
-          stock: z.string().regex(/^\d+$/, "Stock must be a number"),
+          name: z.string().nonempty('Attribute name is required'),
+          price: z.string().regex(/^\d+$/, 'Price must be a number'),
+          stock: z.string().regex(/^\d+$/, 'Stock must be a number')
         })
-      ),
+      )
     })
-  ),
+  )
 });
 
 function FormVariant({ id }: { id: string }) {
@@ -34,38 +35,38 @@ function FormVariant({ id }: { id: string }) {
     defaultValues: {
       variant: [
         {
-          name: "unit",
+          name: 'unit',
           attributes: [
             {
-              name: "pcs",
-              price: "100",
-              stock: "1",
-            },
-          ],
-        },
-      ],
-    },
+              name: 'pcs',
+              price: '100',
+              stock: '1'
+            }
+          ]
+        }
+      ]
+    }
   });
   const {
     control,
     handleSubmit,
     register,
-    formState: { errors },
+    formState: { errors }
   } = form;
 
   const {
     fields: variantFields,
     append: appendVariant,
-    remove: removeVariant,
+    remove: removeVariant
   } = useFieldArray({
     control,
-    name: "variant",
+    name: 'variant'
   });
 
   const handleAddVariant = () => {
     appendVariant({
-      name: "",
-      attributes: [{ name: "", price: "", stock: "" }],
+      name: '',
+      attributes: [{ name: '', price: '', stock: '' }]
     });
   };
 
@@ -73,15 +74,15 @@ function FormVariant({ id }: { id: string }) {
     removeVariant(index);
   };
 
-  const mutation = useProductMutation();
+  const mutation = useProductMutation({});
 
   const onSubmit = (data: InputVariantProduct) => {
     console.log(data);
     try {
       mutation.mutate({
         productId: id,
-        warehouseId: warehouseId || product.data?.warehouseId || "",
-        data: data,
+        warehouseId: warehouseId || product.data?.warehouseId || '',
+        data: data
       });
     } catch (error) {
       console.log(error);
@@ -126,76 +127,38 @@ function FormVariant({ id }: { id: string }) {
 
 export default FormVariant;
 
-const FormAttribute = ({
-  variant,
-  control,
-  variantIndex,
-  register,
-  errors,
-  handleRemoveVariant,
-}: any) => {
+const FormAttribute = ({ variant, control, variantIndex, register, errors, handleRemoveVariant }: any) => {
   const {
     fields: attributeFields,
     append: appendAttribute,
-    remove: removeAttribute,
+    remove: removeAttribute
   } = useFieldArray({
     control,
-    name: `variant.${variantIndex}.attributes`,
+    name: `variant.${variantIndex}.attributes`
   });
 
   return (
     <div key={variant.id} className="my-2">
       <h4>Variant {variantIndex + 1}</h4>
-      <Input
-        {...register(`variant.${variantIndex}.name`)}
-        placeholder="Variant Name"
-      />
-      {errors.variant?.[variantIndex]?.name && (
-        <p>{errors.variant[variantIndex].name.message}</p>
-      )}
+      <Input {...register(`variant.${variantIndex}.name`)} placeholder="Variant Name" />
+      {errors.variant?.[variantIndex]?.name && <p>{errors.variant[variantIndex].name.message}</p>}
 
       <h5>Attributes:</h5>
       {attributeFields.map((attribute, attrIndex) => (
         <div key={attribute.id} className="flex gap-2">
-          <Input
-            {...register(
-              `variant.${variantIndex}.attributes.${attrIndex}.name`
-            )}
-            placeholder="Attribute Name"
-          />
-          <Input
-            {...register(
-              `variant.${variantIndex}.attributes.${attrIndex}.price`
-            )}
-            placeholder="Price"
-          />
-          <Input
-            {...register(
-              `variant.${variantIndex}.attributes.${attrIndex}.stock`
-            )}
-            placeholder="Stock"
-          />
-          <Button
-            type="button"
-            onClick={() => removeAttribute(attrIndex)}
-            variant={"destructive"}
-          >
+          <Input {...register(`variant.${variantIndex}.attributes.${attrIndex}.name`)} placeholder="Attribute Name" />
+          <Input {...register(`variant.${variantIndex}.attributes.${attrIndex}.price`)} placeholder="Price" />
+          <Input {...register(`variant.${variantIndex}.attributes.${attrIndex}.stock`)} placeholder="Stock" />
+          <Button type="button" onClick={() => removeAttribute(attrIndex)} variant={'destructive'}>
             <Trash />
           </Button>
         </div>
       ))}
       <div className="mt-4 flex gap-2">
-        <Button
-          type="button"
-          onClick={() => appendAttribute({ name: "", price: "", stock: "" })}
-        >
+        <Button type="button" onClick={() => appendAttribute({ name: '', price: '', stock: '' })}>
           <Plus /> Attribute
         </Button>
-        <Button
-          type="button"
-          onClick={() => handleRemoveVariant(variantIndex)}
-          variant={"destructive"}
-        >
+        <Button type="button" onClick={() => handleRemoveVariant(variantIndex)} variant={'destructive'}>
           <Trash /> Variant
         </Button>
       </div>

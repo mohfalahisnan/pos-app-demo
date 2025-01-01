@@ -1,29 +1,12 @@
-import * as React from "react";
+import * as React from 'react';
 
-import { cn } from "@/lib/utils";
-
-import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import {
-  Drawer,
-  DrawerClose,
-  DrawerContent,
-  DrawerDescription,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerTrigger,
-} from "@/components/ui/drawer";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { useIsMobile } from "@/hooks/use-mobile";
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle, DrawerTrigger } from '@/components/ui/drawer';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { cn } from '@/lib/utils';
 
 export function AddWarehouse() {
   const [open, setOpen] = React.useState(false);
@@ -38,9 +21,7 @@ export function AddWarehouse() {
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>Add Warehouse</DialogTitle>
-            <DialogDescription>
-              Make changes to your warehouse here. Click save when youre done.
-            </DialogDescription>
+            <DialogDescription>Make changes to your warehouse here. Click save when youre done.</DialogDescription>
           </DialogHeader>
           <WarehouseForm />
         </DialogContent>
@@ -56,9 +37,7 @@ export function AddWarehouse() {
       <DrawerContent>
         <DrawerHeader className="text-left">
           <DrawerTitle>Add Warehouse</DrawerTitle>
-          <DrawerDescription>
-            Make changes to your warehouse here. Click save when youre done.
-          </DrawerDescription>
+          <DrawerDescription>Make changes to your warehouse here. Click save when youre done.</DrawerDescription>
         </DrawerHeader>
         <WarehouseForm className="px-4" />
         <DrawerFooter className="pt-2">
@@ -71,9 +50,9 @@ export function AddWarehouse() {
   );
 }
 
-function WarehouseForm({ className }: React.ComponentProps<"form">) {
+function WarehouseForm({ className }: React.ComponentProps<'form'>) {
   return (
-    <form className={cn("grid items-start gap-4", className)}>
+    <form className={cn('grid items-start gap-4', className)}>
       <div className="grid gap-2">
         <Label htmlFor="email">Email</Label>
         <Input type="email" id="email" defaultValue="shadcn@example.com" />

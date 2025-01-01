@@ -1,10 +1,11 @@
-import { getWarehouses } from "@/server/warehouse";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery } from '@tanstack/react-query';
+
+import { getWarehouses } from '@/server/warehouse';
 
 export const useWarehouse = () => {
   const data = useQuery({
-    queryKey: ["warehouses"],
-    queryFn: getWarehouses,
+    queryKey: ['warehouses'],
+    queryFn: getWarehouses
   });
   return data;
 };

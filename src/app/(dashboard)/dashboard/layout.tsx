@@ -1,19 +1,11 @@
-import { AppSidebar } from "@/components/app-sidebar";
+import { getServerSession } from 'next-auth';
 
-import { Separator } from "@/components/ui/separator";
-import {
-  SidebarInset,
-  SidebarProvider,
-  SidebarTrigger,
-} from "@/components/ui/sidebar";
-import { authOptions } from "@/lib/auth";
-import { getServerSession } from "next-auth";
+import { AppSidebar } from '@/components/app-sidebar';
+import { Separator } from '@/components/ui/separator';
+import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
+import { authOptions } from '@/lib/auth';
 
-export default async function Page({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default async function Page({ children }: { children: React.ReactNode }) {
   const session = await getServerSession(authOptions);
   if (!session || !session.user) return <h2>Unauthorized</h2>;
   return (

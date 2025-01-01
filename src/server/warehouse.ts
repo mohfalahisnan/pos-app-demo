@@ -1,7 +1,8 @@
-"use server";
+'use server';
 
-import { prisma } from "@/lib/prisma";
-import { Prisma } from "@prisma/client";
+import { Prisma } from '@prisma/client';
+
+import { prisma } from '@/lib/prisma';
 
 export async function getWarehouses() {
   try {
@@ -16,7 +17,7 @@ export async function getWarehouses() {
 export async function addWarehouse(data: Prisma.WarehouseCreateInput) {
   try {
     const warehouse = await prisma.warehouse.create({
-      data,
+      data
     });
     return warehouse;
   } catch (error) {

@@ -1,5 +1,6 @@
-import { Button } from "@/components/ui/button";
-import { Check } from "lucide-react";
+import { Check } from 'lucide-react';
+
+import { Button } from '@/components/ui/button';
 
 export default function Home() {
   return (
@@ -11,9 +12,7 @@ export default function Home() {
             v1.0
           </div>
         </div>
-        <div className="text-xl xl:text-2xl text-zinc-500 font-bold tracking-[0.25em]">
-          MULTIPURPOSE DEMO
-        </div>
+        <div className="text-xl xl:text-2xl text-zinc-500 font-bold tracking-[0.25em]">MULTIPURPOSE DEMO</div>
       </div>
       {/* hexagon top */}
       <div className="relative z-10 -mt-24">
@@ -74,14 +73,11 @@ export default function Home() {
               <Check size={48} />
             </div>
             <p className="my-16 text-zinc-500 text-lg tracking-widest">
-              Kelola Bisnis Anda dengan Mudah dan Cepat! Dengan POSPRO, nikmati
-              kemudahan mengatur penjualan, inventaris, dan laporan keuangan
-              dalam satu platform. Cocok untuk segala jenis usaha, mulai dari
-              toko ritel hingga restoran. Dapatkan kontrol penuh atas bisnis
-              Anda dan tingkatkan produktivitas dengan fitur canggih dan
-              antarmuka yang intuitif. Mulai sekarang dan rasakan perbedaannya!
+              Kelola Bisnis Anda dengan Mudah dan Cepat! Dengan POSPRO, nikmati kemudahan mengatur penjualan, inventaris, dan laporan keuangan dalam satu
+              platform. Cocok untuk segala jenis usaha, mulai dari toko ritel hingga restoran. Dapatkan kontrol penuh atas bisnis Anda dan tingkatkan
+              produktivitas dengan fitur canggih dan antarmuka yang intuitif. Mulai sekarang dan rasakan perbedaannya!
             </p>
-            <Button size={"lg"} className="rounded-full">
+            <Button size={'lg'} className="rounded-full">
               Get Started
             </Button>
           </div>

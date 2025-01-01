@@ -1,5 +1,6 @@
-import { getCategories } from "@/server/product";
-import ProductForm from "./product-form";
+import { getCategories } from '@/server/product';
+
+import ProductForm from './product-form';
 
 async function Page() {
   const categories = await getCategories();

@@ -1,5 +1,6 @@
 import { Prisma } from '@prisma/client';
 import { useMutation, useQuery } from '@tanstack/react-query';
+import { useSearchParams } from 'next/navigation';
 
 import { PaginateOption } from '@/server/base';
 import { addVariantProduct, getProductById, getProducts, InputVariantProduct } from '@/server/product';
@@ -14,10 +15,14 @@ export const useProduct = (id: string, include?: Prisma.ProductInclude) => {
 };
 
 export const useProducts = (data?: PaginateOption) => {
+  const searchParams = useSearchParams();
+  const page = parseInt(searchParams.get('page') || '1');
+  console.log(page);
   const products = useQuery({
     queryKey: ['products'],
-    queryFn: async () => await getProducts({ ...data })
+    queryFn: async () => await getProducts({ page, pageSize: data?.pageSize, orderBy: data?.orderBy, select: data?.select, where: data?.where })
   });
+
   return products;
 };
 

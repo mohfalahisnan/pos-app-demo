@@ -13,14 +13,73 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Account {
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([provider, providerAccountId])
+}
+
+model Session {
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+
+  @@id([identifier, token])
+}
+
+// Optional for WebAuthn support
+model Authenticator {
+  credentialID         String  @unique
+  userId               String
+  providerAccountId    String
+  credentialPublicKey  String
+  counter              Int
+  credentialDeviceType String
+  credentialBackedUp   Boolean
+  transports           String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId, credentialID])
+}
+
 model User {
-  id        String  @id @default(cuid())
-  username  String  @unique
-  email     String  @unique
-  password  String?
-  firstName String?
-  lastName  String?
-  imageUrl  String?
+  id       String  @id @default(cuid())
+  username String?
+
+  email         String    @unique
+  emailVerified DateTime?
+  password      String?
+  name          String?
+  firstName     String?
+  lastName      String?
+
+  image String?
 
   warehouseId String?
   warehouse   Warehouse? @relation(fields: [warehouseId], references: [id])
@@ -32,6 +91,10 @@ model User {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  Account       Account[]
+  Session       Session[]
+  Authenticator Authenticator[]
 }
 
 model Warehouse {
@@ -111,7 +174,8 @@ model Product {
 
   Stock Stock[]
 
-  Variant Variant[]
+  Variant   Variant[]
+  Logistics Logistics[]
 
   @@map("products")
 }
@@ -128,12 +192,13 @@ model Variant {
 }
 
 model VariantAttribute {
-  id        String  @id @default(cuid())
-  variant   Variant @relation(fields: [variantId], references: [id])
-  variantId String
-  name      String
-  Price     String
-  Stock     Stock?
+  id             String           @id @default(cuid())
+  variant        Variant          @relation(fields: [variantId], references: [id])
+  variantId      String
+  name           String
+  Price          String
+  Stock          Stock[]
+  WholesalePrice WholesalePrice[]
 
   @@map("variant_attribute")
 }
@@ -149,16 +214,23 @@ model Stock {
 
   quantity Int @default(0) // Jumlah stok di lokasi ini
 
-  Product            Product?         @relation(fields: [productId], references: [id])
-  variantAttributeId String           @unique
-  VariantAttribute   VariantAttribute @relation(references: [id], fields: [variantAttributeId])
-  productId          String?
+  Product Product? @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  variantAttributeId String?
+  VariantAttribute   VariantAttribute? @relation(references: [id], fields: [variantAttributeId])
+
+  productId String?
 }
 
 model WholesalePrice {
-  id          String  @id @default(cuid())
-  variant     Variant @relation(fields: [variantId], references: [id])
-  variantId   String
+  id String @id @default(cuid())
+
+  variant   Variant? @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  variantId String?
+
+  variantAttributeId String?
+  variantAttribute   VariantAttribute? @relation(fields: [variantAttributeId], references: [id], onDelete: Cascade)
+
   minQuantity Int // Jumlah minimum pembelian
   price       Float // Harga per unit untuk pembelian grosir
 
@@ -229,22 +301,31 @@ model Order {
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
   Invoice     Invoice[]
+  Logistics   Logistics[]
 
   @@map("orders")
 }
 
 model OrderItem {
-  id         String   @id @default(cuid())
-  orderId    String
-  productId  String
-  quantity   Int // Jumlah produk dalam pesanan
+  id String @id @default(cuid())
+
+  orderId   String
+  productId String
+
+  product_name String
+
+  quantity Int // Jumlah produk dalam pesanan
+
+  price      Float
   unitPrice  Float // Harga satuan saat pesanan dibuat
   discount   Float? // Diskon untuk item
   totalPrice Float // Harga total untuk item setelah diskon
-  order      Order    @relation(fields: [orderId], references: [id])
-  product    Product  @relation(fields: [productId], references: [id])
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+
+  order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("order_items")
 }
@@ -266,6 +347,28 @@ model Invoice {
   @@map("invoices")
 }
 
+model Logistics {
+  id              String       @id @default(cuid())
+  transactionType LogisticType
+
+  sourceId      String // ID sumber: ID gudang atau ID toko
+  destinationId String? // ID tujuan: ID toko atau ID pembeli
+
+  productId String // ID produk
+  orderId   String?
+
+  quantity Int // Jumlah produk yang dikirim
+
+  shippedAt   DateTime? // Waktu pengiriman
+  deliveredAt DateTime? // Waktu diterima (opsional)
+
+  status LogisticStatus @default(PENDING)
+  notes  String? // Catatan tambahan (opsional)
+
+  product Product @relation(references: [id], fields: [productId])
+  order   Order?  @relation(fields: [orderId], references: [id], onDelete: SetNull)
+}
+
 enum OrderStatus {
   PENDING
   PROCESSING
@@ -279,6 +382,23 @@ enum InvoiceStatus {
   UNPAID
   PAID
   OVERDUE
+}
+
+enum LogisticType {
+  WAREHOUSE_TO_STORE
+  STORE_TO_WAREHOUSE
+  WAREHOUSE_TO_WAREHOUSE
+  STORE_TO_STORE
+  WAREHOUSE_TO_END_USER
+  STORE_TO_ENDUSER
+}
+
+enum LogisticStatus {
+  PENDING
+  SHIPPED
+  DELIVERED
+  FAILED
+  CANCELED
 }
 
 enum Role {

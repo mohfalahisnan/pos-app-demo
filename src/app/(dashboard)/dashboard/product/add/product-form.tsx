@@ -19,6 +19,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { SingleImageDropzone } from '@/components/upload/single-image';
 import { useToast } from '@/hooks/use-toast';
 import { useEdgeStore } from '@/lib/edgestore';
+import { ValidationError } from '@/lib/enum';
 import { cn } from '@/lib/utils';
 import { addProduct } from '@/server/product';
 
@@ -30,7 +31,7 @@ const formSchema = z.object({
   stock: z.number(),
   available: z.boolean().optional(),
   category: z.string(),
-  tags: z.array(z.string()).nonempty('Please at least one item')
+  tags: z.array(z.string()).nonempty(ValidationError.NON_EMPTY)
 });
 
 export default function ProductForm({ categories }: { categories: Category[] }) {

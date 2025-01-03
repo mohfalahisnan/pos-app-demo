@@ -4,8 +4,8 @@ import Image from 'next/image';
 
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { getSelectedStore } from '@/lib/localstorage';
 import { getProductById } from '@/server/product';
-import { getSelectedStore } from '@/Storage/Data';
 
 function ProductPopup({ item }: { item: Product }) {
   const warehouseId = getSelectedStore();
@@ -34,7 +34,7 @@ function ProductPopup({ item }: { item: Product }) {
       };
     };
   }>;
-  console.log(data);
+
   return (
     <Dialog>
       <DialogTrigger>
@@ -50,7 +50,7 @@ function ProductPopup({ item }: { item: Product }) {
                 <div key={stock.id}>
                   {stock.warehouse?.id && stock.warehouseId === warehouseId && (
                     <div>
-                      {stock.quantity} {stock.VariantAttribute.name} di {stock?.warehouse?.name} {stock.store?.name}
+                      {stock.quantity} {stock.VariantAttribute?.name} di {stock?.warehouse?.name} {stock.store?.name}
                     </div>
                   )}
                 </div>

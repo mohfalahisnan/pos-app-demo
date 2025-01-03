@@ -1,3 +1,4 @@
+import { PrismaAdapter } from '@next-auth/prisma-adapter';
 import { compare } from 'bcryptjs';
 import type { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
@@ -47,5 +48,6 @@ export const authOptions: NextAuthOptions = {
       clientId: process.env.GOOGLE_CLIENT_ID || '',
       clientSecret: process.env.GOOGLE_CLIENT_SECRET || ''
     })
-  ]
+  ],
+  adapter: PrismaAdapter(prisma)
 };

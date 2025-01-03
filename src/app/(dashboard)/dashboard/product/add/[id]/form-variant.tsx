@@ -9,8 +9,8 @@ import { Card } from '@/components/ui/card';
 import { Form } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { useProduct, useProductMutation } from '@/hooks/product';
+import { getSelectedStore } from '@/lib/localstorage';
 import { InputVariantProduct } from '@/server/product';
-import { getSelectedStore } from '@/Storage/Data';
 
 const formSchema = z.object({
   variant: z.array(
@@ -98,6 +98,7 @@ function FormVariant({ id }: { id: string }) {
 
   return (
     <Card className="p-6">
+      <div className="text-xl my-2 font-medium">Add Variant To Products</div>
       <Form {...form}>
         <form onSubmit={handleSubmit(onSubmit)}>
           {variantFields.map((variant, variantIndex) => (
@@ -112,8 +113,8 @@ function FormVariant({ id }: { id: string }) {
             />
           ))}
 
-          <div className="flex gap-2 mt-4">
-            <Button type="button" onClick={handleAddVariant}>
+          <div className="flex justify-end gap-2 mt-4">
+            <Button type="button" variant={'secondary'} onClick={handleAddVariant}>
               <Plus /> Variant
             </Button>
 
@@ -138,14 +139,16 @@ const FormAttribute = ({ variant, control, variantIndex, register, errors, handl
   });
 
   return (
-    <div key={variant.id} className="my-2">
-      <h4>Variant {variantIndex + 1}</h4>
-      <Input {...register(`variant.${variantIndex}.name`)} placeholder="Variant Name" />
-      {errors.variant?.[variantIndex]?.name && <p>{errors.variant[variantIndex].name.message}</p>}
+    <div key={variant.id} className="mt-2 mb-8">
+      <div className="flex gap-2 items-center">
+        <h4 className="w-32">Variant Name :</h4>
+        <Input {...register(`variant.${variantIndex}.name`)} placeholder="Variant Name" />
+        {errors.variant?.[variantIndex]?.name && <p>{errors.variant[variantIndex].name.message}</p>}
+      </div>
 
-      <h5>Attributes:</h5>
+      <h5 className="mt-4">Attributes:</h5>
       {attributeFields.map((attribute, attrIndex) => (
-        <div key={attribute.id} className="flex gap-2">
+        <div key={attribute.id} className="flex gap-2 my-2">
           <Input {...register(`variant.${variantIndex}.attributes.${attrIndex}.name`)} placeholder="Attribute Name" />
           <Input {...register(`variant.${variantIndex}.attributes.${attrIndex}.price`)} placeholder="Price" />
           <Input {...register(`variant.${variantIndex}.attributes.${attrIndex}.stock`)} placeholder="Stock" />

@@ -1,18 +1,12 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
-
-import { DataTable } from '@/components/data-table';
 import { Skeleton } from '@/components/ui/skeleton';
-import { getProducts } from '@/server/product';
+import { useProducts } from '@/hooks/product';
 
-import ProductPopup from './product-popup';
+import ProductTable from './product-table';
 
 function Page() {
-  const { data, isLoading } = useQuery({
-    queryKey: ['products'],
-    queryFn: async () => await getProducts({})
-  });
+  const { data, isLoading } = useProducts();
   if (isLoading)
     return (
       <div className="grid grid-cols-4 gap-4">
@@ -23,9 +17,9 @@ function Page() {
       </div>
     );
   return (
-    <div className="grid grid-cols-4 gap-4">
-      <DataTable />
-      {data && data.data.map(item => <ProductPopup item={item} key={item.id} />)}
+    <div>
+      {data && <ProductTable data={data.data} />}
+      {/* <div className="grid grid-cols-4 gap-4">{data && data.data.map(item => <ProductPopup item={item} key={item.id} />)}</div> */}
     </div>
   );
 }

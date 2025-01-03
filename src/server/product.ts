@@ -103,3 +103,41 @@ export async function addVariantProduct({ productId, warehouseId, data }: { prod
     throw new Error();
   }
 }
+
+export async function warehouseToStore(productId: string, warehouseId: string, storeId: string, quantity: number) {
+  try {
+    return prisma.$transaction(async tx => {
+      const stock = await tx.stock.update({
+        where: {
+          id: '',
+          productId,
+          warehouseId
+        },
+        data: {
+          quantity: {
+            decrement: quantity
+          }
+        }
+      });
+
+      if (stock.quantity < 0) {
+        throw new Error('Insufficient stock');
+      }
+
+      const log = await tx.logistics.create({
+        data: {
+          transactionType: 'WAREHOUSE_TO_STORE',
+          destinationId: storeId,
+          sourceId: warehouseId,
+          quantity: quantity,
+          status: 'PENDING',
+          productId: productId
+        }
+      });
+
+      return { stock, log };
+    });
+  } catch (error) {
+    throw new Error('Insufficient stock');
+  }
+}

@@ -21,8 +21,8 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from '@/components/ui/sidebar';
 import { useToast } from '@/hooks/use-toast';
+import { getSelectedStore, setSelectedStore } from '@/lib/localstorage';
 import { addStore, getStores } from '@/server/store';
-import { getSelectedStore, setSelectedStore } from '@/Storage/Data';
 
 import { Button } from './ui/button';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from './ui/dialog';

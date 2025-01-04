@@ -174,8 +174,9 @@ model Product {
 
   Stock Stock[]
 
-  Variant   Variant[]
-  Logistics Logistics[]
+  Variant        Variant[]
+  Logistics      Logistics[]
+  WholesalePrice WholesalePrice[]
 
   @@map("products")
 }
@@ -225,6 +226,9 @@ model Stock {
 model WholesalePrice {
   id String @id @default(cuid())
 
+  productId String?
+  product   Product? @relation(fields: [productId], references: [id], onDelete: Cascade)
+
   variant   Variant? @relation(fields: [variantId], references: [id], onDelete: Cascade)
   variantId String?
 
@@ -233,8 +237,6 @@ model WholesalePrice {
 
   minQuantity Int // Jumlah minimum pembelian
   price       Float // Harga per unit untuk pembelian grosir
-
-  @@unique([variantId, minQuantity]) // Kombinasi unik varian dan jumlah minimum
 }
 
 model Category {

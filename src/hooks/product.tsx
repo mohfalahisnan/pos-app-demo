@@ -3,7 +3,7 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import { useSearchParams } from 'next/navigation';
 
 import { PaginateOption } from '@/server/base';
-import { addVariantProduct, getProductById, getProducts, InputVariantProduct } from '@/server/product';
+import { addVariantProduct, getAllProducts, getProductById, getProducts, InputVariantProduct } from '@/server/product';
 import { UseMutationConfig } from '@/types';
 
 export const useProduct = (id: string, include?: Prisma.ProductInclude) => {
@@ -32,5 +32,12 @@ export const useProductMutation = (config: UseMutationConfig) => {
       return await addVariantProduct({ productId, warehouseId, data });
     },
     ...config
+  });
+};
+
+export const useAllProduct = () => {
+  return useQuery({
+    queryKey: ['products'],
+    queryFn: async () => await getAllProducts()
   });
 };

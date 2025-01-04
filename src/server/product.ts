@@ -15,6 +15,20 @@ export async function getProducts(data: PaginateOption) {
   }
 }
 
+export async function getAllProducts() {
+  try {
+    const product = await prisma.product.findMany({
+      where: {
+        isActive: true
+      }
+    });
+    return product;
+  } catch (error) {
+    console.log(error);
+    throw new Error();
+  }
+}
+
 export async function addProduct(data: Prisma.ProductCreateInput) {
   try {
     const product = await prisma.product.create({

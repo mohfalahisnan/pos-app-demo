@@ -4,7 +4,11 @@ import { Prisma } from '@prisma/client';
 
 import { prisma } from '@/lib/prisma';
 
-export async function getWarehouses() {
+/**
+ * Retrieves all warehouses from the database.
+ * @returns {Promise<any[]>} An array of warehouse objects.
+ */
+export async function getWarehouses(): Promise<any[]> {
   try {
     const data = await prisma.warehouse.findMany();
     return data;
@@ -14,7 +18,12 @@ export async function getWarehouses() {
   }
 }
 
-export async function addWarehouse(data: Prisma.WarehouseCreateInput) {
+/**
+ * Adds a new warehouse to the database.
+ * @param {Prisma.WarehouseCreateInput} data - The data for the new warehouse.
+ * @returns {Promise<any>} The newly created warehouse object.
+ */
+export async function addWarehouse(data: Prisma.WarehouseCreateInput): Promise<any> {
   try {
     const warehouse = await prisma.warehouse.create({
       data

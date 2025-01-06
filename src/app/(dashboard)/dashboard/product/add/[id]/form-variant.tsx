@@ -9,6 +9,7 @@ import { Card } from '@/components/ui/card';
 import { Form } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { useProduct, useProductMutation } from '@/hooks/product';
+import { useToast } from '@/hooks/use-toast';
 import { getSelectedStore } from '@/lib/localstorage';
 import { InputVariantProduct } from '@/server/product';
 
@@ -29,7 +30,7 @@ const formSchema = z.object({
 
 function FormVariant({ id }: { id: string }) {
   const product = useProduct(id);
-  const warehouseId = getSelectedStore();
+  const storeId = getSelectedStore();
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -69,7 +70,7 @@ function FormVariant({ id }: { id: string }) {
       attributes: [{ name: '', price: '', stock: '' }]
     });
   };
-
+  const { toast } = useToast();
   const handleRemoveVariant = (index: number) => {
     removeVariant(index);
   };
@@ -77,11 +78,14 @@ function FormVariant({ id }: { id: string }) {
   const mutation = useProductMutation({});
 
   const onSubmit = (data: InputVariantProduct) => {
-    console.log(data);
     try {
+      if (!storeId) {
+        toast({ description: 'Please select a store' });
+        return;
+      }
       mutation.mutate({
         productId: id,
-        warehouseId: warehouseId || product.data?.warehouseId || '',
+        storeId: storeId || '',
         data: data
       });
     } catch (error) {

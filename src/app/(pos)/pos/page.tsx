@@ -1,4 +1,6 @@
-import { ChevronLeft, SearchIcon, SlidersHorizontal } from 'lucide-react';
+'use client';
+import { ChevronLeft, Fullscreen, SearchIcon, SlidersHorizontal } from 'lucide-react';
+import Link from 'next/link';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,15 +10,25 @@ import ProductCard from './product-card';
 import { CartProvider } from './product-cart-context';
 
 const Page = () => {
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen();
+    } else if (document.exitFullscreen) {
+      document.exitFullscreen();
+    }
+  };
+
   return (
     <CartProvider>
-      <div className="w-full h-screen flex">
+      <div className="w-full h-screen flex overflow-hidden">
         <div className="w-full h-screen overflow-auto">
           <div className="flex justify-between gap-2 items-center p-4">
             <div className="flex gap-2">
-              <Button size={'icon'} variant={'secondary'}>
-                <ChevronLeft />
-              </Button>
+              <Link href={'/dashboard'}>
+                <Button size={'icon'} variant={'secondary'}>
+                  <ChevronLeft />
+                </Button>
+              </Link>
               <div className="relative">
                 <Input className="w-64 bg-white" placeholder="Search..." />
                 <div className="absolute top-0 right-0">
@@ -26,9 +38,12 @@ const Page = () => {
                 </div>
               </div>
             </div>
-            <div>
+            <div className="flex gap-2">
               <Button variant={'secondary'} size={'icon'}>
                 <SlidersHorizontal />
+              </Button>
+              <Button onClick={toggleFullscreen} variant={'secondary'} size={'icon'}>
+                <Fullscreen />
               </Button>
             </div>
           </div>

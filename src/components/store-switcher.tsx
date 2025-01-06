@@ -40,15 +40,16 @@ export function StoreSwithcer() {
 
   const selectedStore = getSelectedStore();
   const [store, setStore] = React.useState<string | null>(selectedStore);
-  const router = useRouter();
+  const [, forceUpdate] = React.useReducer(x => x + 1, 0); // Force update state
 
   React.useEffect(() => {
     if (stores) {
       if (selectedStore === null) setSelectedStore(stores[0].id);
     }
     if (store) setSelectedStore(store);
-    router.refresh();
-  }, [store]);
+
+    forceUpdate();
+  }, [store, stores, selectedStore]);
 
   if (!stores)
     return (
@@ -100,6 +101,7 @@ export function StoreSwithcer() {
                   {store.name}
                 </DropdownMenuItem>
               ))}
+
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => setIsAdd(true)} className="flex items-center gap-2 p-2">
                 <Plus size={20} /> <div className="mt-0.5">Add Store</div>

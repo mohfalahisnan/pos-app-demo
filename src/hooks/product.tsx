@@ -4,7 +4,7 @@ import { useSearchParams } from 'next/navigation';
 
 import { PaginateOption } from '@/server/base';
 import { addVariantProduct, getAllProducts, getProductById, getProducts, InputVariantProduct } from '@/server/product';
-import { UseMutationConfig } from '@/types';
+import { UseMutationConfig } from '@/types/types';
 
 export const useProduct = (id: string, include?: Prisma.ProductInclude) => {
   const product = useQuery({
@@ -28,8 +28,8 @@ export const useProducts = (data?: PaginateOption) => {
 
 export const useProductMutation = (config: UseMutationConfig) => {
   return useMutation({
-    mutationFn: async ({ productId, warehouseId, data }: { productId: string; warehouseId: string; data: InputVariantProduct }) => {
-      return await addVariantProduct({ productId, warehouseId, data });
+    mutationFn: async ({ productId, storeId, data }: { productId: string; storeId: string; data: InputVariantProduct }) => {
+      return await addVariantProduct({ productId, storeId, data });
     },
     ...config
   });

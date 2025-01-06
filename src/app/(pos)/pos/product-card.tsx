@@ -1,6 +1,6 @@
 'use client';
 
-import { Prisma, Product } from '@prisma/client';
+import { Product } from '@prisma/client';
 import { Loader, Minus, Plus } from 'lucide-react';
 import Image from 'next/image';
 import { useState } from 'react';
@@ -10,6 +10,7 @@ import { DebouncedInput } from '@/components/ui/debounced-input';
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useAllProduct, useProduct } from '@/hooks/product';
 import { formatToRupiah } from '@/lib/currency';
+import { ProductAttributesIncludeStockWholesalePrice } from '@/types/types';
 
 import { useCart } from './product-cart-context';
 
@@ -23,7 +24,7 @@ function ProductCard() {
     );
 
   return (
-    <div className="grid grid-cols-4 gap-4 p-4">
+    <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 p-4">
       {products &&
         products.map(item => {
           return <ProductItem key={item.id} item={item} />;
@@ -38,6 +39,7 @@ const ProductItem = ({ item }: { item: Product }) => {
   const { cartDispatch } = useCart();
   const [qty, setQty] = useState(1);
   const [selectedAttribute, setSelectedAttribute] = useState<string>();
+
   const handleAddToCart = (product: Product) => {
     console.log('Adding to cart:', product);
     cartDispatch({
@@ -45,7 +47,9 @@ const ProductItem = ({ item }: { item: Product }) => {
       payload: { ...product, quantity: qty }
     });
     setQty(1);
+    setSelectedAttribute(undefined);
   };
+
   const data = useProduct(item.id, {
     Variant: {
       include: {
@@ -58,27 +62,16 @@ const ProductItem = ({ item }: { item: Product }) => {
       }
     }
   });
-  const product = data.data as Prisma.ProductGetPayload<{
-    include: {
-      Variant: {
-        include: {
-          attributes: {
-            include: {
-              Stock: true;
-              WholesalePrice: true;
-            };
-          };
-        };
-      };
-    };
-  }>;
+
+  const product = data.data as ProductAttributesIncludeStockWholesalePrice;
+
   return (
     <Dialog>
       <DialogTrigger>
         <div className="w-full bg-card rounded-lg shadow-sm p-1">
           <Image src={item.imageUrl || '/image1.jpg'} alt="iamge" width={200} height={200} className="w-full aspect-square object-cover rounded" />
-          <div className="p-4">
-            <h4 className="text-lg font-bold">{item.name}</h4>
+          <div className="p-4 w-full text-left">
+            <h4 className="text-lg font-bold capitalize">{item.name}</h4>
             <h5 className="text-zinc-700">{formatToRupiah(item.price)}</h5>
           </div>
         </div>
@@ -86,6 +79,11 @@ const ProductItem = ({ item }: { item: Product }) => {
       <DialogContent className="sm:max-w-[425px]">
         <DialogTitle className="capitalize">{item.name}</DialogTitle>
         <DialogDescription>
+          {data.isLoading && (
+            <div className="flex justify-center items-center w-full py-4">
+              <Loader className="animate-spin" />
+            </div>
+          )}
           {data.data &&
             product.Variant.map(variant => {
               return (
@@ -98,23 +96,26 @@ const ProductItem = ({ item }: { item: Product }) => {
                         key={attribute.id}
                         onClick={() => setSelectedAttribute(attribute.id)}
                       >
-                        {attribute.name}
+                        {attribute.name} ( {attribute.Stock?.[0]?.quantity} ) {attribute.WholesalePrice.length > 0 && 'Grosir'}
                       </Button>
                     ))}
                   </div>
                 </div>
               );
             })}
-          <div className="flex w-full justify-between items-center gap-2">
-            <Button onClick={() => setQty(qty !== 0 ? qty - 1 : 0)}>
-              <Minus />
-            </Button>
 
-            <DebouncedInput type="number" className="text-center" value={qty} onChange={e => setQty(parseInt(e as string))} />
-            <Button onClick={() => setQty(qty + 1)}>
-              <Plus />
-            </Button>
-          </div>
+          {!data.isLoading && (
+            <div className="flex w-full justify-between items-center gap-2">
+              <Button onClick={() => setQty(qty !== 0 ? qty - 1 : 0)}>
+                <Minus />
+              </Button>
+
+              <DebouncedInput type="number" className="text-center" value={qty} onChange={e => setQty(parseInt(e as string))} />
+              <Button onClick={() => setQty(qty + 1)}>
+                <Plus />
+              </Button>
+            </div>
+          )}
         </DialogDescription>
         <DialogFooter>
           <DialogClose asChild>

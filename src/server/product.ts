@@ -5,6 +5,11 @@ import { prisma } from '@/lib/prisma';
 
 import { entities, PaginatedResult, PaginateOption } from './base';
 
+/**
+ * Retrieves a paginated list of products
+ * @param data - Pagination options
+ * @returns Promise containing paginated product results
+ */
 export async function getProducts(data: PaginateOption) {
   try {
     const products = await entities.product.paginateFindMany({ ...data });
@@ -15,6 +20,26 @@ export async function getProducts(data: PaginateOption) {
   }
 }
 
+export async function getVariantAttributeStock(id: string) {
+  try {
+    return await prisma.stock.findFirst({
+      where: {
+        variantAttributeId: id
+      },
+      include: {
+        VariantAttribute: true
+      }
+    });
+  } catch (error) {
+    console.log(error);
+    throw new Error();
+  }
+}
+
+/**
+ * Retrieves all active products from the database
+ * @returns Promise containing an array of active products
+ */
 export async function getAllProducts() {
   try {
     const product = await prisma.product.findMany({
@@ -29,6 +54,11 @@ export async function getAllProducts() {
   }
 }
 
+/**
+ * Creates a new product in the database
+ * @param data - Product creation data
+ * @returns Promise containing the created product
+ */
 export async function addProduct(data: Prisma.ProductCreateInput) {
   try {
     const product = await prisma.product.create({
@@ -41,6 +71,10 @@ export async function addProduct(data: Prisma.ProductCreateInput) {
   }
 }
 
+/**
+ * Retrieves all categories from the database
+ * @returns Promise containing an array of categories
+ */
 export async function getCategories() {
   try {
     return await prisma.category.findMany();
@@ -50,6 +84,12 @@ export async function getCategories() {
   }
 }
 
+/**
+ * Retrieves a specific product by its ID
+ * @param id - The unique identifier of the product
+ * @param include - Optional Prisma include object for related data
+ * @returns Promise containing the found product or null
+ */
 export async function getProductById(id: string, include?: Prisma.ProductInclude) {
   try {
     const product = await prisma.product.findUnique({
@@ -76,7 +116,14 @@ export type InputVariantProduct = {
   }[];
 };
 
-export async function addVariantProduct({ productId, warehouseId, data }: { productId: string; warehouseId: string; data: InputVariantProduct }) {
+/**
+ * Adds variant products with their attributes and stock information
+ * @param productId - The ID of the parent product
+ * @param storeId - The ID of the store where stock will be stored
+ * @param data - Variant product data including attributes and stock information
+ * @returns Promise containing the updated product
+ */
+export async function addVariantProduct({ productId, storeId, data }: { productId: string; storeId: string; data: InputVariantProduct }) {
   try {
     for (const variantData of data.variant) {
       const variant = await prisma.variant.create({
@@ -102,9 +149,9 @@ export async function addVariantProduct({ productId, warehouseId, data }: { prod
                 id: productId
               }
             },
-            warehouse: {
+            store: {
               connect: {
-                id: warehouseId //warehouseId
+                id: storeId
               }
             }
           }
@@ -118,6 +165,15 @@ export async function addVariantProduct({ productId, warehouseId, data }: { prod
   }
 }
 
+/**
+ * Transfers product stock from warehouse to store
+ * @param productId - The ID of the product to transfer
+ * @param warehouseId - The source warehouse ID
+ * @param storeId - The destination store ID
+ * @param quantity - The quantity to transfer
+ * @returns Promise containing the updated stock and logistics log
+ * @throws Error if insufficient stock is available
+ */
 export async function warehouseToStore(productId: string, warehouseId: string, storeId: string, quantity: number) {
   try {
     return prisma.$transaction(async tx => {

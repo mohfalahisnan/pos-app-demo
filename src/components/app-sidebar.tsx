@@ -1,22 +1,18 @@
 'use client';
 import {
   AudioWaveform,
-  Blocks,
-  BugIcon,
+  BarChart,
   Check,
   Command,
   GalleryVerticalEnd,
   Home,
   LayoutDashboard,
-  Lock,
-  LockIcon,
-  MessageCircle,
   Monitor,
   Package,
-  ServerOff,
+  Package2,
   Settings2,
   Store,
-  User,
+  Users,
   Wallet,
   WarehouseIcon
 } from 'lucide-react';
@@ -127,85 +123,100 @@ const data = {
           icon: LayoutDashboard
         },
         {
+          title: 'Order',
+          url: '/dashboard/order',
+          icon: Wallet,
+          badge: '4'
+        },
+        {
+          title: 'Product',
+          url: '/dashboard/product',
+          icon: Package
+        },
+        {
           title: 'Tasks',
           url: '/tasks',
           icon: Check
         },
         {
-          title: 'Apps',
-          url: '/apps',
-          icon: Package
-        },
-        {
-          title: 'Chats',
-          url: '/chats',
-          badge: '3',
-          icon: MessageCircle
-        },
-        {
-          title: 'Users',
-          url: '/users',
-          icon: User
+          title: 'Point Of Sales',
+          url: '/pos',
+          icon: Monitor
         }
       ]
     },
     {
-      title: 'Pages',
+      title: 'Management',
       items: [
         {
-          title: 'Auth',
-          icon: LockIcon,
+          title: 'Warehouse',
+          icon: WarehouseIcon,
           items: [
             {
-              title: 'Sign In',
-              url: '/sign-in'
+              title: 'Warehouse',
+              url: '/warehouse',
+              icon: WarehouseIcon
             },
             {
-              title: 'Sign In (2 Col)',
-              url: '/sign-in-2'
+              title: 'Product',
+              url: '/warehouse/product',
+              icon: Package
             },
             {
-              title: 'Sign Up',
-              url: '/sign-up'
+              title: 'Stock',
+              url: '/warehouse/stock',
+              icon: Package2
             },
             {
-              title: 'Forgot Password',
-              url: '/forgot-password'
+              title: 'Users',
+              url: '/warehouse/users',
+              icon: Users
             },
             {
-              title: 'OTP',
-              url: '/otp'
+              title: 'Reports',
+              url: '/warehouse/reports',
+              icon: BarChart
+            },
+            {
+              title: 'Settings',
+              url: '/warehouse/settings',
+              icon: Settings2
             }
           ]
         },
         {
-          title: 'Errors',
-          icon: BugIcon,
+          title: 'Store',
+          icon: Store,
           items: [
             {
-              title: 'Unauthorized',
-              url: '/401',
-              icon: Lock
+              title: 'Store',
+              url: '/store',
+              icon: Store
             },
             {
-              title: 'Forbidden',
-              url: '/403',
-              icon: User
+              title: 'Product',
+              url: '/store/product',
+              icon: Package
             },
             {
-              title: 'Not Found',
-              url: '/404',
-              icon: User
+              title: 'Stock',
+              url: '/store/stock',
+              icon: Package2
             },
             {
-              title: 'Internal Server Error',
-              url: '/500',
-              icon: ServerOff
+              title: 'Users',
+              url: '/store/users',
+              icon: Users
             },
             {
-              title: 'Maintenance Error',
-              url: '/503',
-              icon: Blocks
+              title: 'Reports',
+              url: '/store/reports',
+              icon: BarChart
+            },
+            {
+              title: 'Settings',
+              url: '/store/settings',
+              icon: Settings2
             }
           ]
         }

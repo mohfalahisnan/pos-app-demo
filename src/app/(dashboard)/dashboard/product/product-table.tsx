@@ -11,7 +11,7 @@ import {
   getSortedRowModel,
   useReactTable
 } from '@tanstack/react-table';
-import { ArrowDown, ArrowUp, ArrowUpDown, Search } from 'lucide-react';
+import { ArrowDown, ArrowUp, ArrowUpDown, FilterIcon, Search } from 'lucide-react';
 import Image from 'next/image';
 import React from 'react';
 
@@ -19,6 +19,7 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Select, SelectItem, SelectContent, SelectTrigger } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
 const columns: ColumnDef<Product, any>[] = [
@@ -42,19 +43,26 @@ const columns: ColumnDef<Product, any>[] = [
     enableHiding: false
   },
   {
-    accessorKey: 'imageUrl',
-    header: 'Image',
-    cell: (info: any) => info.getValue(),
-    meta: {
-      cellType: 'image'
-    },
-    enableColumnFilter: false,
-    enableSorting: false
-  },
-  {
     accessorKey: 'name',
     header: 'Name',
-    cell: (info: any) => info.getValue()
+    cell: info => (
+      <div className="text-left w-full items-start gap-2 flex">
+        <div>
+          <Image
+            src={info.row.original.imageUrl || '/image1.jpg'}
+            title={info.row.original.name}
+            alt={info.row.original.name}
+            width={200}
+            height={200}
+            className="w-20 aspect-square object-cover rounded"
+          />
+        </div>
+        <div>
+          <div className="text-base capitalize font-bold">{info.row.original.name}</div>
+          <div className="text-xs text-muted-foreground">{info.row.original.description}</div>
+        </div>
+      </div>
+    )
   },
   {
     accessorKey: 'sku',
@@ -66,23 +74,13 @@ const columns: ColumnDef<Product, any>[] = [
     header: 'Price',
     cell: (info: any) => info.getValue(),
     meta: {
-      filterVariant: 'select',
+      filterVariant: 'range',
       filter: true
     }
   }
 ];
 
-function ProductTable({
-  data
-}: //   pageSize = 10,
-//   enableSearch = false,
-{
-  data: Product[];
-
-  //   pageSize: number;
-  //   enableSearch?: boolean;
-}) {
-  //   const [globalFilter, setGlobalFilter] = React.useState("");
+function ProductTable({ data }: { data: Product[] }) {
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
   const table = useReactTable({
     data,
@@ -200,33 +198,55 @@ function Filter({ column }: { column: Column<any, unknown> }) {
   const { filterVariant } = column.columnDef.meta ?? ({} as any);
   return filterVariant === 'range' ? (
     <div>
-      <div className="flex space-x-2">
-        {/* See faceted column filters example for min max values functionality */}
-        <DebouncedInput
-          type="number"
-          value={(columnFilterValue as [number, number])?.[0] ?? ''}
-          onChange={value => column.setFilterValue((old: [number, number]) => [value, old?.[1]])}
-          placeholder={`Min`}
-          className="w-24 border shadow rounded"
-        />
-        <DebouncedInput
-          type="number"
-          value={(columnFilterValue as [number, number])?.[1] ?? ''}
-          onChange={value => column.setFilterValue((old: [number, number]) => [old?.[0], value])}
-          placeholder={`Max`}
-          className="w-24 border shadow rounded"
-        />
-      </div>
-      <div className="h-1" />
+      <Popover>
+        <PopoverTrigger asChild>
+          <Button variant="outline" size={'icon'} className="rounded">
+            <FilterIcon size={14} />
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-full max-w-sm">
+          <div className="flex space-x-2">
+            {/* See faceted column filters example for min max values functionality */}
+            <DebouncedInput
+              type="number"
+              value={(columnFilterValue as [number, number])?.[0] ?? ''}
+              onChange={value => column.setFilterValue((old: [number, number]) => [value, old?.[1]])}
+              placeholder={`Min`}
+              className="w-24 border shadow rounded"
+            />
+            <DebouncedInput
+              type="number"
+              value={(columnFilterValue as [number, number])?.[1] ?? ''}
+              onChange={value => column.setFilterValue((old: [number, number]) => [old?.[0], value])}
+              placeholder={`Max`}
+              className="w-24 border shadow rounded"
+            />
+          </div>
+          <div className="h-1" />
+        </PopoverContent>
+      </Popover>
     </div>
   ) : filterVariant === 'select' ? (
-    <select onChange={e => column.setFilterValue(e.target.value)} value={columnFilterValue?.toString()}>
-      {/* See faceted column filters example for dynamic select options */}
-      <option value="">All</option>
-      <option value="complicated">complicated</option>
-      <option value="relationship">relationship</option>
-      <option value="single">single</option>
-    </select>
+    <>
+      <Select onValueChange={value => column.setFilterValue(value)} value={columnFilterValue?.toString()}>
+        <SelectTrigger>
+          <FilterIcon size={14} />
+        </SelectTrigger>
+        <SelectContent>
+          {column.getFacetedRowModel().rows.map((item, index) => {
+            return (
+              <SelectItem key={index} value={item.original.id}>
+                {item.original.price}
+              </SelectItem>
+            );
+          })}
+          <SelectItem value={null as unknown as string}>All</SelectItem>
+          <SelectItem value="100">100</SelectItem>
+          <SelectItem value="200">200</SelectItem>
+          <SelectItem value="300">300</SelectItem>
+        </SelectContent>
+      </Select>
+    </>
   ) : (
     <div>
       <Popover>

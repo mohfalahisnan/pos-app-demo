@@ -6,7 +6,7 @@ import { authOptions } from '@/lib/auth';
 
 export default async function Home() {
   const session = await getServerSession(authOptions);
-  console.log(session);
+
   return (
     <div>
       <div className="relative z-20 flex flex-col items-center justify-center">

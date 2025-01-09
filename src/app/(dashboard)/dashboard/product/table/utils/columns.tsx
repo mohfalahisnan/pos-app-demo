@@ -11,11 +11,13 @@ type DeepKeys<T> = T extends object
     }[keyof T & string]
   : never;
 
+type MetaConfig =
+  | { filter: true; filterVariant: 'select'; filterOptions: any[] }
+  | { filter: true; filterVariant: 'range' | 'text'; filterOptions?: never }
+  | { filter?: false; filterVariant?: never; filterOptions?: never };
+
 export type ColumnConfig<T> = ColumnDef<T> & {
-  meta?: {
-    filterVariant?: 'range' | 'select' | 'text';
-    filter?: boolean;
-  };
+  meta?: MetaConfig;
   CellClass?: string;
 };
 

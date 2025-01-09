@@ -13,7 +13,6 @@ import { Select } from '@/components/ui/select';
 import { TableHead } from '@/components/ui/table';
 
 export function TableHeader<T>({ header }: { header: Header<T, any> }) {
-  console.log(header.column.id, header.column.columnDef.meta);
   return (
     <TableHead key={header.id} colSpan={header.colSpan}>
       {header.isPlaceholder ? null : (
@@ -53,7 +52,8 @@ export function TableHeader<T>({ header }: { header: Header<T, any> }) {
 
 function Filter({ column }: { column: Column<any, unknown> }) {
   const columnFilterValue = column.getFilterValue();
-  const { filterVariant } = column.columnDef.meta ?? ({} as any);
+  const { filterVariant, filterOptions } = column.columnDef.meta ?? ({} as any);
+
   return filterVariant === 'range' ? (
     <div>
       <Popover>
@@ -91,17 +91,12 @@ function Filter({ column }: { column: Column<any, unknown> }) {
           <FilterIcon size={14} />
         </SelectTrigger>
         <SelectContent>
-          {column.getFacetedRowModel().rows.map((item, index) => {
-            return (
-              <SelectItem key={index} value={item.original.id}>
-                {item.original.price}
-              </SelectItem>
-            );
-          })}
           <SelectItem value={null as unknown as string}>All</SelectItem>
-          <SelectItem value="100">100</SelectItem>
-          <SelectItem value="200">200</SelectItem>
-          <SelectItem value="300">300</SelectItem>
+          {(filterOptions as string[] | undefined)?.map(item => (
+            <SelectItem value={item} key={item}>
+              {item}
+            </SelectItem>
+          ))}
         </SelectContent>
       </Select>
     </>

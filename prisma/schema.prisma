@@ -122,9 +122,10 @@ model Store {
   createdAt DateTime @default(now()) // Tanggal pembuatan
   updatedAt DateTime @updatedAt // Tanggal terakhir diperbarui
 
-  Product Product[]
-  Stock   Stock[]
-  User    User[]
+  Product        Product[]
+  Stock          Stock[]
+  User           User[]
+  ProductMetrics ProductMetrics[]
 
   @@map("stores")
 }
@@ -177,6 +178,7 @@ model Product {
   Variant        Variant[]
   Logistics      Logistics[]
   WholesalePrice WholesalePrice[]
+  ProductMetrics ProductMetrics[]
 
   @@map("products")
 }
@@ -408,4 +410,23 @@ enum Role {
   ADMIN
   MODERATOR
   USER
+}
+
+model ProductMetrics {
+  id            String    @id @default(cuid())
+  productId     String
+  storeId       String
+  views         Int       @default(0)
+  purchases     Int       @default(0)
+  likes         Int       @default(0)
+  lastViewed    DateTime?
+  lastPurchased DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  product Product @relation(fields: [productId], references: [id])
+  store   Store   @relation(fields: [storeId], references: [id])
+
+  @@unique([productId, storeId]) // Composite unique constraint
 }

@@ -3,7 +3,7 @@
 import { Skeleton } from '@/components/ui/skeleton';
 import { useProducts } from '@/hooks/product';
 
-import ProductTable from './product-table';
+import ProductPopup from './product-popup';
 
 function Page() {
   const { data, isLoading } = useProducts();
@@ -18,8 +18,8 @@ function Page() {
     );
   return (
     <div>
-      {data && <ProductTable data={data.data} />}
-      {/* <div className="grid grid-cols-4 gap-4">{data && data.data.map(item => <ProductPopup item={item} key={item.id} />)}</div> */}
+      {/* {data && <ProductTable data={data.data} />} */}
+      <div className="grid grid-cols-4 gap-4">{data && data.data.map(item => <ProductPopup item={item} key={item.id} />)}</div>
     </div>
   );
 }

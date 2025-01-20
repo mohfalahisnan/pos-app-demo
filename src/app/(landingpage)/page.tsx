@@ -1,6 +1,7 @@
 import { Check } from 'lucide-react';
 import { getServerSession } from 'next-auth';
 
+import { BorderTrail } from '@/components/ui/border-trail';
 import { Button } from '@/components/ui/button';
 import { authOptions } from '@/lib/auth';
 
@@ -41,7 +42,15 @@ export default async function Home() {
           <div className="bg-[#e9e9e9] w-full h-full rounded-xl inset-0"></div>
         </div>
         <div className="aspect-square w-full bg-white/5 bg-clip-padding backdrop-filter backdrop-blur-sm border rounded-2xl p-2 scale-125 shadow-[0px_0px_43px_0px_rgba(0,_0,_0,_0.1)] relative z-20">
-          <div className="bg-[#e9e9e9] w-full h-full rounded-xl inset-0"></div>
+          <div className="bg-[#e9e9e9] w-full h-full rounded-xl inset-0 relative">
+            <BorderTrail
+              style={{
+                boxShadow: '0px 0px 60px 30px rgb(255 255 255 / 50%), 0 0 100px 60px rgb(0 0 0 / 50%), 0 0 140px 90px rgb(0 0 0 / 50%)'
+              }}
+              size={20}
+              className="opacity-25"
+            />
+          </div>
         </div>
         <div className="aspect-square w-full bg-background/10 bg-clip-padding backdrop-filter backdrop-blur-sm border rounded-2xl p-2">
           <div className="bg-[#e9e9e9] w-full h-full rounded-xl inset-0"></div>
@@ -71,7 +80,14 @@ export default async function Home() {
       </div>
       <div className="mt-8 xl:mt-16">
         <div className="flex flex-col p-4 xl:p-0 md:flex-row gap-16 items-center">
-          <div className="bg-[#e9e9e9] rounded-xl w-full aspect-square"></div>
+          <div className="bg-[#e9e9e9] relative rounded-xl w-full aspect-square">
+            <BorderTrail
+              style={{
+                boxShadow: '0px 0px 60px 30px rgb(255 255 255 / 50%), 0 0 100px 60px rgb(0 0 0 / 50%), 0 0 140px 90px rgb(0 0 0 / 50%)'
+              }}
+              size={100}
+            />
+          </div>
           <div className="w-full">
             <div className="aspect-square w-16 border-4 text-green-500 border-green-500 rounded-full flex items-center justify-center">
               <Check size={48} />

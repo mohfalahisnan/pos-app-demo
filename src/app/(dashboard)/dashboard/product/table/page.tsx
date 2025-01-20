@@ -59,9 +59,16 @@ function Page() {
         }
       }
     ],
-    actions: [],
+    actions: [
+      {
+        label: 'Edit',
+        onClick: a => {
+          console.log(a.id);
+        }
+      }
+    ],
     selectable: true,
-    showAction: false
+    showAction: true
   });
   if (isLoading)
     return (

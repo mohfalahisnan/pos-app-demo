@@ -17,7 +17,7 @@ export const useProduct = (id: string, include?: Prisma.ProductInclude) => {
 export const useProducts = (data?: PaginateOption) => {
   const searchParams = useSearchParams();
   const page = parseInt(searchParams.get('page') || '1');
-  console.log(page);
+
   const products = useQuery({
     queryKey: ['products'],
     queryFn: async () => await getProducts({ page, pageSize: data?.pageSize, orderBy: data?.orderBy, select: data?.select, where: data?.where })

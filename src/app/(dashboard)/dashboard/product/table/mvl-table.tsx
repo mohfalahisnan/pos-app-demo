@@ -27,10 +27,10 @@ const MvlTable = <T,>({ data, columns }: MvlTableProps<T>) => {
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(), //client side filtering
     getSortedRowModel: getSortedRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    debugTable: true,
-    debugHeaders: true,
-    debugColumns: false
+    getPaginationRowModel: getPaginationRowModel()
+    // debugTable: true,
+    // debugHeaders: true,
+    // debugColumns: false
   });
   return (
     <div className="w-full min-w-2xl space-y-4">

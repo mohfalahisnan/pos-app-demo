@@ -10,7 +10,11 @@
     "lint:fix": "next lint --fix",
     "format": "prettier --write ./src",
     "typecheck": "tsc --noEmit",
-    "prepare": "husky"
+    "prepare": "husky",
+    "db:push": "prisma db push",
+    "db:studio": "prisma studio",
+    "db:migrate": "prisma migrate dev",
+    "db:generate": "prisma generate"
   },
   "dependencies": {
     "@edgestore/react": "^0.2.2",
